@@ -1,6 +1,6 @@
 package Games::EVE::APIv2;
 
-use 5.016;
+use v5.16;
 use strict;
 use warnings FATAL => 'all';
 
