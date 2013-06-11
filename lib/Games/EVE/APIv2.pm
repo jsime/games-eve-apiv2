@@ -6,7 +6,7 @@ use warnings FATAL => 'all';
 
 =head1 NAME
 
-Games::EVE::APIv2 - The great new Games::EVE::APIv2!
+Games::EVE::APIv2 - Perl interface to CCP's API (version 2) for EVE Online
 
 =head1 VERSION
 
@@ -19,34 +19,37 @@ our $VERSION = '0.01';
 
 =head1 SYNOPSIS
 
-Quick summary of what the module does.
-
-Perhaps a little code snippet.
+This library allows you to easily access EVE Online API endpoints. Instead of having
+to deal with CCP's XML response directly, you gain access to much more Perl-esque data
+structures. Additionally, the library makes it simpler to access related information,
+such as making an initial call to the CharacterSheet and following that up with
+Asset information for a pilot, or Corporations for which they're a member (or were in
+the past), and so on.
 
     use Games::EVE::APIv2;
 
-    my $foo = Games::EVE::APIv2->new();
-    ...
+    my $eve = Games::EVE::APIv2->new( key_id => '...', v_code => '...' );
+
+    foreach my $char ($eve->characters) {
+        foreach my $corp ($char->corporations) {
+            printf("%s %s in %s from %s until %s\n",
+                $char->name, (defined $corp->end_date ? 'is' : 'was').
+                $corp->name, $corp->start_date,
+                (defined $corp->end_date ? $corp->end_date : 'present'));
+        }
+    }
 
 =head1 EXPORT
 
-A list of functions that can be exported.  You can delete this section
-if you don't export anything, such as for a purely object-oriented module.
+This library exports nothing but its constructor.
 
 =head1 SUBROUTINES/METHODS
 
-=head2 function1
+=head2 new
 
 =cut
 
-sub function1 {
-}
-
-=head2 function2
-
-=cut
-
-sub function2 {
+sub new {
 }
 
 =head1 AUTHOR
@@ -138,4 +141,4 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =cut
 
-1; # End of Games::EVE::APIv2
+1;
