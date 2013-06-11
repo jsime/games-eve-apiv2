@@ -11,6 +11,15 @@ Makefile
 Makefile.old
 MANIFEST.bak
 META.yml
+META.json
 MYMETA.yml
+MYMETA.json
 nytprof.out
 pm_to_blib
+.*.s[a-w][a-z]
+*.un~
+Session.vim
+.netrwhist
+*~
+Games-EVE-APIv2-*.tar.gz
+Makefile.PL
