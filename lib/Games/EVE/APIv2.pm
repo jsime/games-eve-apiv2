@@ -1,8 +1,16 @@
 package Games::EVE::APIv2;
 
-use v5.16;
-use strict;
-use warnings FATAL => 'all';
+use Moose;
+
+has 'key_id' => (
+    is  => 'ro',
+    isa => 'Str',
+);
+
+has 'v_code' => (
+    is  => 'ro',
+    isa => 'Str',
+);
 
 =head1 NAME
 
@@ -15,7 +23,6 @@ Version 0.01
 =cut
 
 our $VERSION = '0.01';
-
 
 =head1 SYNOPSIS
 
@@ -45,13 +52,6 @@ This library exports nothing but its constructor.
 
 =head1 SUBROUTINES/METHODS
 
-=head2 new
-
-=cut
-
-sub new {
-}
-
 =head1 AUTHOR
 
 Jon Sime, C<< <jonsime at gmail.com> >>
@@ -61,9 +61,6 @@ Jon Sime, C<< <jonsime at gmail.com> >>
 Please report any bugs or feature requests to C<bug-games-eve-apiv2 at rt.cpan.org>, or through
 the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Games-EVE-APIv2>.  I will be notified, and then you'll
 automatically be notified of progress on your bug as I make changes.
-
-
-
 
 =head1 SUPPORT
 
@@ -140,5 +137,8 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 =cut
+
+no Moose;
+__PACKAGE__->meta->make_immutable;
 
 1;
