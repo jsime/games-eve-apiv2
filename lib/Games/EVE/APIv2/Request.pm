@@ -85,7 +85,8 @@ sub get {
     my %opts = @_;
     $api = $opts{'api'} if exists $opts{'api'};
 
-    die 
+    die "Cannot call APIv2 without API path, Key ID and Verification Code"
+        unless defined $api && $self->has_key_id && $self->has_v_code;
 }
 
 no Moose;
