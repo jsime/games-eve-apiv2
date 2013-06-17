@@ -1,5 +1,9 @@
 package Games::EVE::APIv2::Request;
 
+use strict;
+use warnings FATAL => 'all';
+use namespace::autoclean;
+
 use LWP::UserAgent;
 use XML::LibXML;
 
