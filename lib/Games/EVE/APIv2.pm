@@ -13,32 +13,32 @@ has 'v_code' => (
     isa => 'Str',
 );
 
-has 'access_mask' => {
+has 'access_mask' => (
     is  => 'ro',
     isa => 'Int',
-};
+);
 
-has 'key_type' => {
+has 'key_type' => (
     is  => 'ro',
     isa => 'Str',
-};
+);
 
-has 'expires' => {
+has 'expires' => (
     is  => 'ro',
     isa => 'DateTime',
-};
+);
 
-has 'req' => {
+has 'req' => (
     is  => 'rw',
     isa => 'Games::EVE::APIv2::Request',
-}
+);
 
-has 'character_list' => {
+has 'character_list' => (
     is        => 'rw',
     isa       => 'ArrayRef[Games::EVE::APIv2::Character]',
     clearer   => 'clear_characters',
     predicate => 'has_characters',
-};
+);
 
 =head1 NAME
 
