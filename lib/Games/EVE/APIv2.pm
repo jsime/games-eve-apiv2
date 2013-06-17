@@ -12,6 +12,13 @@ has 'v_code' => (
     isa => 'Str',
 );
 
+has 'character_list' => {
+    is        => 'rw',
+    isa       => 'ArrayRef[Games::EVE::APIv2::Character]',
+    clearer   => 'clear_characters',
+    predicate => 'has_characters',
+}
+
 =head1 NAME
 
 Games::EVE::APIv2 - Perl interface to CCP's API (version 2) for EVE Online
@@ -51,6 +58,19 @@ the past), and so on.
 This library exports nothing but its constructor.
 
 =head1 SUBROUTINES/METHODS
+
+=head2 characters
+
+Returns a list of Games::EVE::APIv2::Character objects for characters accessible
+via the provided API Key.
+
+=cut
+
+sub characters {
+    my ($self) = @_;
+
+    return @{$self->character_list} if $self->has_characters;
+}
 
 =head1 AUTHOR
 
