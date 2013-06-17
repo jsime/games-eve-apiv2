@@ -1,5 +1,6 @@
 package Games::EVE::APIv2;
 
+use Games::EVE::APIv2::Request;
 use Moose;
 
 has 'key_id' => (
@@ -26,6 +27,11 @@ has 'expires' => {
     is  => 'ro',
     isa => 'DateTime',
 };
+
+has 'req' => {
+    is  => 'rw',
+    isa => 'Games::EVE::APIv2::Request',
+}
 
 has 'character_list' => {
     is        => 'rw',
@@ -85,6 +91,12 @@ sub characters {
     my ($self) = @_;
 
     return @{$self->character_list} if $self->has_characters;
+}
+
+sub BUILD {
+    my ($self) = @_;
+
+    $self->req(Games::EVE::APIv2::Request->new( api_key = $self->api_key, v_code => $self->v_code));
 }
 
 =head1 AUTHOR
