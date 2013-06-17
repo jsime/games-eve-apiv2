@@ -32,7 +32,7 @@ has 'character_list' => {
     isa       => 'ArrayRef[Games::EVE::APIv2::Character]',
     clearer   => 'clear_characters',
     predicate => 'has_characters',
-}
+};
 
 =head1 NAME
 
