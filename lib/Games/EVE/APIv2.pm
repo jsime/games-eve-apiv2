@@ -1,5 +1,9 @@
 package Games::EVE::APIv2;
 
+use strict;
+use warnings FATAL => 'all';
+use namespace::autoclean;
+
 use Games::EVE::APIv2::Request;
 use Moose;
 
@@ -92,6 +96,18 @@ sub characters {
 
     return @{$self->character_list} if $self->has_characters;
 }
+
+=head1 INTERNAL SUBROUTINES
+
+The following methods and subroutines are not intended for use by applications,
+but are documented here for anyone hoping to chip away at the internal workings
+of this library.
+
+=head2 BUILD
+
+Constructor hook. Instantiates a ::Request object with provided API keys.
+
+=cut
 
 sub BUILD {
     my ($self) = @_;
