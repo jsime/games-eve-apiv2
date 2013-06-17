@@ -17,9 +17,9 @@ has 'v_code' => (
     isa => 'Str',
 );
 
-sub get => (
+sub get {
     my $self = shift;
-);
+}
 
 no Moose;
 __PACKAGE__->meta->make_immutable;

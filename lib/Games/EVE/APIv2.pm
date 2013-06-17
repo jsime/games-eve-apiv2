@@ -96,7 +96,7 @@ sub characters {
 sub BUILD {
     my ($self) = @_;
 
-    $self->req(Games::EVE::APIv2::Request->new( api_key = $self->api_key, v_code => $self->v_code));
+    $self->req(Games::EVE::APIv2::Request->new( api_key => $self->api_key, v_code => $self->v_code));
 }
 
 =head1 AUTHOR
