@@ -28,6 +28,15 @@ has 'v_code' => (
 
 sub get {
     my $self = shift;
+
+    my ($api);
+    $api = $self->api if $self->has_api;
+    $api = shift if defined $_[0] && !ref($_[0]);
+
+    my %opts = @_;
+    $api = $opts{'api'} if exists $opts{'api'};
+
+    die 
 }
 
 no Moose;
