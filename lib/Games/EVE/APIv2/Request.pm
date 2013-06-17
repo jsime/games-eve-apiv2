@@ -74,6 +74,9 @@ Examples:
 Note that the API method is named by only the path portion of the official
 CCP URL, minus the file extensions generally present.
 
+The return value is an XML::LibXML document object on success. On all failures,
+C<die()> is called.
+
 =cut
 
 sub get {
