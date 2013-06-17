@@ -12,6 +12,21 @@ has 'v_code' => (
     isa => 'Str',
 );
 
+has 'access_mask' => {
+    is  => 'ro',
+    isa => 'Int',
+};
+
+has 'key_type' => {
+    is  => 'ro',
+    isa => 'Str',
+};
+
+has 'expires' => {
+    is  => 'ro',
+    isa => 'DateTime',
+};
+
 has 'character_list' => {
     is        => 'rw',
     isa       => 'ArrayRef[Games::EVE::APIv2::Character]',
