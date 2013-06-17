@@ -18,6 +18,7 @@ use warnings FATAL => 'all';
 use namespace::autoclean;
 
 use LWP::UserAgent;
+use URI::Escape;
 use XML::LibXML;
 
 use Moose;
@@ -87,6 +88,31 @@ sub get {
 
     die "Cannot call APIv2 without API path, Key ID and Verification Code"
         unless defined $api && $self->has_key_id && $self->has_v_code;
+
+    if (exists $opts{'key_id'}) {
+        $opts{'keyID'} = $opts{'key_id'};
+        delete $opts{'key_id'};
+    }
+    if (exists $opts{'v_code'}) {
+        $opts{'vCode'} = $opts{'v_code'};
+        delete $opts{'v_code'};
+    }
+
+    $opts{'keyID'} = $self->key_id if !exists $opts{'keyID'} && $self->has_key_id;
+    $opts{'vCode'} = $self->v_code if !exists $opts{'vCode'} && $self->has_v_code;
+    delete $opts{'api'} if exists $opts{'api'};
+
+    my $api_url = 'https://api.eveonline.com/' . $api . '.xml.aspx?' .
+        join('&', map { uri_escape($_) . '=' . uri_escape($opts{$_}) } sort keys %opts);
+
+    my $ua = LWP::UserAgent->new();
+    $ua->agent(sprintf('%s (%s %s)', $ua->_agent, 'Games::EVE::APIv2', $Games::EVE::APIv2::VERSION));
+
+    my $r = $ua->get($api_url);
+
+    die "Error contacting CCP API: " . $r->status_line unless $r->is_success;
+
+    return XML::LibXML->load_xml( string => $r->decoded_content );
 }
 
 no Moose;
