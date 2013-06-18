@@ -78,7 +78,6 @@ sub characters {
     my $xml = $self->req->get('account/Characters');
 
     foreach my $char_id ($xml->find(q{//result/rowset[@name='characters']/row/@characterID})) {
-print STDERR " **** Character ID: $char_id\n";
         push(@chars, Games::EVE::APIv2::Character->new(
                 character_id => "$char_id",
                 key_id       => $self->key_id,
