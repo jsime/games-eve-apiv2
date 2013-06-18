@@ -18,11 +18,11 @@ use warnings FATAL => 'all';
 use Moose;
 use namespace::autoclean;
 
-extends 'Games::EVE::APIv2';
+extends 'Games::EVE::APIv2::Base';
 
 has 'key_id' => (
     is  => 'ro',
-    isa => 'Int',
+    isa => 'Num',
 );
 
 has 'v_code' => (
@@ -32,7 +32,7 @@ has 'v_code' => (
 
 has 'character_id' => (
     is        => 'ro',
-    isa       => 'Int',
+    isa       => 'Num',
     predicate => 'has_character_id',
 );
 
