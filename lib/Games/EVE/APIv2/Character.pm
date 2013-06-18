@@ -20,16 +20,6 @@ use namespace::autoclean;
 
 extends 'Games::EVE::APIv2::Base';
 
-has 'key_id' => (
-    is  => 'ro',
-    isa => 'Num',
-);
-
-has 'v_code' => (
-    is  => 'ro',
-    isa => 'Str',
-);
-
 has 'character_id' => (
     is        => 'ro',
     isa       => 'Num',
@@ -37,9 +27,17 @@ has 'character_id' => (
 );
 
 has 'name' => (
-    is  => 'ro',
+    is  => 'rw',
     isa => 'Str',
 );
+
+sub BUILD {
+    my ($self) = @_;
+
+    my $xml = $self->req->get('char/CharacterSheet', characterID => $self->character_id);
+
+    $self->name($xml->findvalue(q{//result/name[1]}));
+}
 
 __PACKAGE__->meta->make_immutable;
 
