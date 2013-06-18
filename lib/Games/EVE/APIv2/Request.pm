@@ -105,7 +105,7 @@ sub get {
     $opts{'vCode'} = $self->v_code if !exists $opts{'vCode'} && $self->has_v_code;
     delete $opts{'api'} if exists $opts{'api'};
 
-    die "Requested API method doesn't appear valid: $api" unless $api =~ m{^[a-z]/[a-zA-Z]$}o;
+    die "Requested API method doesn't appear valid: $api" unless $api =~ m{^[a-z]+/[a-zA-Z]+$}o;
 
     my $api_url = 'https://api.eveonline.com/' . $api . '.xml.aspx?' .
         join('&', map { uri_escape($_) . '=' . uri_escape($opts{$_}) } sort keys %opts);
