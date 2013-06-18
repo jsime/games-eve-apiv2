@@ -16,6 +16,11 @@ my $builder = Module::Build->new(
         'Test::More' => 0,
     },
     requires => {
+        'LWP::UserAgent'    => 0,
+        'Moose'             => 0,
+        'MooseX::SetOnce'   => 0,
+        'URI::Escape'       => 0,
+        'XML::LibXML'       => 0,
     },
     add_to_cleanup     => [ 'Games-EVE-APIv2-*' ],
     create_makefile_pl => 'traditional',
