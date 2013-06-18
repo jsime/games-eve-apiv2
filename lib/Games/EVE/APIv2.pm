@@ -41,6 +41,9 @@ use warnings FATAL => 'all';
 use namespace::autoclean;
 
 use Games::EVE::APIv2::Request;
+
+use Games::EVE::APIv2::Character;
+
 use Moose;
 
 has 'key_id' => (
@@ -97,6 +100,22 @@ sub characters {
     my ($self) = @_;
 
     return @{$self->character_list} if $self->has_characters;
+
+    my @chars;
+
+    my $xml = $self->req->get('account/Characters');
+
+    foreach my $char_id ($xml->find(q{//result/rowset[@name='characters']/row/@characterID})) {
+print STDERR " **** Character ID: $char_id\n";
+        push(@chars, Games::EVE::APIv2::Character->new(
+                character_id => $char_id,
+                key_id       => $self->key_id,
+                v_code       => $self->v_code
+        ));
+    }
+
+    $self->character_list(\@chars);
+    return @chars;
 }
 
 =head1 INTERNAL SUBROUTINES
@@ -114,7 +133,7 @@ Constructor hook. Instantiates a ::Request object with provided API keys.
 sub BUILD {
     my ($self) = @_;
 
-    $self->req(Games::EVE::APIv2::Request->new( api_key => $self->api_key, v_code => $self->v_code));
+    $self->req(Games::EVE::APIv2::Request->new( key_id => $self->key_id, v_code => $self->v_code));
 }
 
 =head1 AUTHOR
