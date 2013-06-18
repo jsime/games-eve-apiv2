@@ -15,13 +15,13 @@ Using the C<get()> method is the primary interface for this module.
 
 use strict;
 use warnings FATAL => 'all';
-use namespace::autoclean;
 
 use LWP::UserAgent;
 use URI::Escape;
 use XML::LibXML;
 
 use Moose;
+use namespace::autoclean;
 
 has 'api' => (
     is        => 'rw',
@@ -120,7 +120,6 @@ sub get {
     return XML::LibXML->load_xml( string => $r->decoded_content );
 }
 
-no Moose;
 __PACKAGE__->meta->make_immutable;
 
 1;

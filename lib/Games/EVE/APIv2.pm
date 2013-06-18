@@ -38,13 +38,13 @@ the past), and so on.
 
 use strict;
 use warnings FATAL => 'all';
-use namespace::autoclean;
 
 use Games::EVE::APIv2::Request;
 
 use Games::EVE::APIv2::Character;
 
 use Moose;
+use namespace::autoclean;
 
 has 'key_id' => (
     is  => 'ro',
@@ -222,7 +222,6 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =cut
 
-no Moose;
 __PACKAGE__->meta->make_immutable;
 
 1;

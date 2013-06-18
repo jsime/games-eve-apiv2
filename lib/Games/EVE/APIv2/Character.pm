@@ -14,9 +14,9 @@ of a Character object.
 
 use strict;
 use warnings FATAL => 'all';
-use namespace::autoclean;
 
 use Moose;
+use namespace::autoclean;
 
 extends 'Games::EVE::APIv2';
 
@@ -41,7 +41,6 @@ has 'name' => (
     isa => 'Str',
 );
 
-no Moose;
 __PACKAGE__->meta->make_immutable;
 
 1;
