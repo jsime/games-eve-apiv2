@@ -29,6 +29,7 @@ has 'character_id' => (
 has 'name' => (
     is  => 'rw',
     isa => 'Str',
+    traits => [qw( SetOnce )],
 );
 
 sub BUILD {

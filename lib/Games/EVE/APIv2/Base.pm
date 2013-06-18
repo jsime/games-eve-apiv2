@@ -16,6 +16,7 @@ use warnings FATAL => 'all';
 use Games::EVE::APIv2::Request;
 
 use Moose;
+use MooseX::SetOnce;
 use namespace::autoclean;
 
 has 'key_id' => (
