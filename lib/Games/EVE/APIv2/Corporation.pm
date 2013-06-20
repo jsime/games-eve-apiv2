@@ -30,6 +30,24 @@ has 'name' => (
     traits => [qw( SetOnce )],
 );
 
+has 'ticker' => (
+    is     => 'rw',
+    isa    => 'Str',
+    traits => [qw( SetOnce )],
+);
+
+has 'url' => (
+    is     => 'rw',
+    isa    => 'Str',
+    traits => [qw( SetOnce )],
+);
+
+has 'tax_rate' => (
+    is     => 'rw',
+    isa    => 'Num',
+    traits => [qw( SetOnce )],
+);
+
 sub BUILD {
     my ($self) = @_;
 
