@@ -54,6 +54,9 @@ sub BUILD {
     my $xml = $self->req->get('char/CorporationSheet', corporationID => $self->corporation_id);
 
     $self->name(     $xml->findvalue(q{//result/corporationName[1]}));
+    $self->ticker(   $xml->findvalue(q{//result/ticker[1]}));
+    $self->url(      $xml->findvalue(q{//result/url[1]}));
+    $self->tax_rate( $xml->findvalue(q{//result/taxRate[1]}));
 }
 
 __PACKAGE__->meta->make_immutable;
