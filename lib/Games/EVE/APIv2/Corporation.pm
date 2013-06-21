@@ -53,7 +53,7 @@ sub BUILD {
 
     my $xml = $self->req->get('char/CorporationSheet', corporationID => $self->corporation_id);
 
-    $self->name(     $xml->findvalue(q{//result/name[1]}));
+    $self->name(     $xml->findvalue(q{//result/corporationName[1]}));
 }
 
 __PACKAGE__->meta->make_immutable;
