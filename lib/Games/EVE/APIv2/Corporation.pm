@@ -48,6 +48,18 @@ has 'tax_rate' => (
     traits => [qw( SetOnce )],
 );
 
+has 'member_count' => (
+    is     => 'rw',
+    isa    => 'Int',
+    traits => [qw( SetOnce )],
+);
+
+has 'member_limit' => (
+    is     => 'rw',
+    isa    => 'Int',
+    traits => [qw( SetOnce )],
+);
+
 sub BUILD {
     my ($self) = @_;
 
@@ -57,6 +69,8 @@ sub BUILD {
     $self->ticker(   $xml->findvalue(q{//result/ticker[1]}));
     $self->url(      $xml->findvalue(q{//result/url[1]}));
     $self->tax_rate( $xml->findvalue(q{//result/taxRate[1]}));
+    $self->member_count( $xml->findvalue(q{//result/memberCount[1]}));
+    $self->member_limit( $xml->findvalue(q{//result/memberLimit[1]}));
 }
 
 __PACKAGE__->meta->make_immutable;
