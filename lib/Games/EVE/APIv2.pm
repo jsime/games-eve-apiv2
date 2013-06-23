@@ -41,6 +41,7 @@ use warnings FATAL => 'all';
 
 use Games::EVE::APIv2::Base;
 use Games::EVE::APIv2::Character;
+use Games::EVE::APIv2::Corporation;
 
 =head1 EXPORT
 
