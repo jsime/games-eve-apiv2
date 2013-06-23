@@ -24,21 +24,27 @@ has 'corporation_id' => (
     predicate => 'has_corporation_id',
 );
 
-has [qw( name ticker url )] => (
+has [qw( name ticker )] => (
     is     => 'rw',
     isa    => 'Str',
     traits => [qw( SetOnce )],
 );
 
+has [qw( url )] => (
+    is     => 'rw',
+    isa    => 'Maybe[Str]',
+    traits => [qw( SetOnce )],
+);
+
 has [qw( tax_rate )] => (
     is     => 'rw',
-    isa    => 'Num',
+    isa    => 'Maybe[Num]',
     traits => [qw( SetOnce )],
 );
 
 has [qw( shares member_count member_limit )] => (
     is     => 'rw',
-    isa    => 'Int',
+    isa    => 'Maybe[Int]',
     traits => [qw( SetOnce )],
 );
 
@@ -53,8 +59,8 @@ sub BUILD {
     $self->tax_rate( $xml->findvalue(q{//result/taxRate[1]}));
     $self->shares(   $xml->findvalue(q{//result/shares[1]}));
 
-    $self->member_count( $xml->findvalue(q{//result/memberCount[1]}));
-    $self->member_limit( $xml->findvalue(q{//result/memberLimit[1]}));
+    $self->member_count($xml->findvalue(q{//result/memberCount[1]}));
+    $self->member_limit($xml->findvalue(q{//result/memberLimit[1]}));
 }
 
 __PACKAGE__->meta->make_immutable;
