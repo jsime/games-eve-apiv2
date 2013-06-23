@@ -56,6 +56,13 @@ has 'character_list' => (
     predicate => 'has_characters',
 );
 
+has 'corporation_list' => (
+    is        => 'rw',
+    isa       => 'ArrayRef[Games::EVE::APIv2::Corporation]',
+    clearer   => 'clear_corporations',
+    predicate => 'has_corporations',
+);
+
 =head1 EXPORT
 
 This library exports nothing but its constructor.
