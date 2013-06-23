@@ -45,7 +45,7 @@ has [qw( shares member_count member_limit )] => (
 sub BUILD {
     my ($self) = @_;
 
-    my $xml = $self->req->get('char/CorporationSheet', corporationID => $self->corporation_id);
+    my $xml = $self->req->get('corp/CorporationSheet', corporationID => $self->corporation_id);
 
     $self->name(     $xml->findvalue(q{//result/corporationName[1]}));
     $self->ticker(   $xml->findvalue(q{//result/ticker[1]}));
