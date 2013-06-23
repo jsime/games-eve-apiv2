@@ -52,6 +52,23 @@ sub BUILD {
     $self->balance(  $xml->findvalue(q{//result/balance[1]}));
 }
 
+sub corporations {
+    my ($self) = @_;
+
+    return @{$self->corporation_list} if $self->has_corporations;
+
+    my $xml = $self->req->get('eve/CharacterInfo', characterID => $self->character_id);
+    my @nodes = $xml->findnodes(q{//result/rowset[@name='employmentHistory']/row});
+
+    my @corps;
+    foreach $corpnode (@nodes) {
+        push(@corps, Games::EVE::APIv2::Corporation->new(
+            key_id => $self->key_id, v_code => $self->v_code,
+            corporation_id => $corpnode->findvalue(q{@corporationID}),
+        );
+    }
+}
+
 __PACKAGE__->meta->make_immutable;
 
 1;
