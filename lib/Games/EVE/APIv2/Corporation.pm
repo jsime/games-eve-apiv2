@@ -60,7 +60,7 @@ sub BUILD {
     $self->shares(   $xml->findvalue(q{//result/shares[1]}));
 
     $self->member_count($xml->findvalue(q{//result/memberCount[1]}));
-    $self->member_limit($xml->findvalue(q{//result/memberLimit[1]}));
+    $self->member_limit($xml->findvalue(q{//result/memberLimit[1]}) || undef);
 }
 
 __PACKAGE__->meta->make_immutable;
