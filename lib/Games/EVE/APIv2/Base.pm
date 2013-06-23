@@ -90,6 +90,23 @@ sub characters {
     return @chars;
 }
 
+=head2 corporations
+
+Returns list of Games::EVE::APIv2::Corporation objects for corporations accessible
+via the provided API Key. Note that only CEOs and Directors may create corporate
+API Keys.
+
+Note also that this is not the same as calling the corporations() method through a
+Character object - as that will return the character's corporate history instead.
+
+=cut
+
+sub corporations {
+    my ($self) = @_;
+
+    return @{$self->corporation_list} if $self->has_corporations;
+}
+
 =head1 INTERNAL SUBROUTINES
 
 The following methods and subroutines are not intended for use by applications,
