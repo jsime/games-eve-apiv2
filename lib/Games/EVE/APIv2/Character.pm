@@ -61,10 +61,12 @@ sub corporations {
     my @nodes = $xml->findnodes(q{//result/rowset[@name='employmentHistory']/row});
 
     my @corps;
-    foreach $corpnode (@nodes) {
-        push(@corps, Games::EVE::APIv2::Corporation->new(
-            key_id => $self->key_id, v_code => $self->v_code,
-            corporation_id => $corpnode->findvalue(q{@corporationID}),
+    foreach my $corpnode (@nodes) {
+        push(@corps,
+            Games::EVE::APIv2::Corporation->new(
+                key_id => $self->key_id, v_code => $self->v_code,
+                corporation_id => $corpnode->findvalue(q{@corporationID}),
+            )
         );
     }
 }
