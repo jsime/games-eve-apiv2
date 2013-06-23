@@ -69,6 +69,9 @@ sub corporations {
             )
         );
     }
+
+    $self->corporation_list(\@corps);
+    return @corps;
 }
 
 __PACKAGE__->meta->make_immutable;
