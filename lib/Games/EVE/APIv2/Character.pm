@@ -26,43 +26,13 @@ has 'character_id' => (
     predicate => 'has_character_id',
 );
 
-has 'name' => (
+has [qw( name dob race bloodline ancestry gender )] => (
     is     => 'rw',
     isa    => 'Str',
     traits => [qw( SetOnce )],
 );
 
-has 'dob' => (
-    is     => 'rw',
-    isa    => 'Str',
-    traits => [qw( SetOnce )],
-);
-
-has 'race' => (
-    is     => 'rw',
-    isa    => 'Str',
-    traits => [qw( SetOnce )],
-);
-
-has 'bloodline' => (
-    is     => 'rw',
-    isa    => 'Str',
-    traits => [qw( SetOnce )],
-);
-
-has 'ancestry' => (
-    is     => 'rw',
-    isa    => 'Str',
-    traits => [qw( SetOnce )],
-);
-
-has 'gender' => (
-    is     => 'rw',
-    isa    => 'Str',
-    traits => [qw( SetOnce )],
-);
-
-has 'balance' => (
+has [qw( balance )] => (
     is     => 'rw',
     isa    => 'Num',
     traits => [qw( SetOnce )],
