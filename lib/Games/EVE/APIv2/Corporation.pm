@@ -24,43 +24,19 @@ has 'corporation_id' => (
     predicate => 'has_corporation_id',
 );
 
-has 'name' => (
+has [qw( name ticker url )] => (
     is     => 'rw',
     isa    => 'Str',
     traits => [qw( SetOnce )],
 );
 
-has 'ticker' => (
-    is     => 'rw',
-    isa    => 'Str',
-    traits => [qw( SetOnce )],
-);
-
-has 'url' => (
-    is     => 'rw',
-    isa    => 'Str',
-    traits => [qw( SetOnce )],
-);
-
-has 'tax_rate' => (
+has [qw( tax_rate )] => (
     is     => 'rw',
     isa    => 'Num',
     traits => [qw( SetOnce )],
 );
 
-has 'shares' => (
-    is     => 'rw',
-    isa    => 'Int',
-    traits => [qw( SetOnce )],
-);
-
-has 'member_count' => (
-    is     => 'rw',
-    isa    => 'Int',
-    traits => [qw( SetOnce )],
-);
-
-has 'member_limit' => (
+has [qw( shares member_count member_limit )] => (
     is     => 'rw',
     isa    => 'Int',
     traits => [qw( SetOnce )],
