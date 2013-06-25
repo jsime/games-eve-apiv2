@@ -50,9 +50,10 @@ has 'req' => (
 );
 
 has 'cached_until' => (
-    is     => 'rw',
-    isa    => 'Str',
-    traits => [qw( SetOnce )],
+    is        => 'rw',
+    isa       => 'Str',
+    traits    => [qw( SetOnce )],
+    predicate => 'is_cached',
 );
 
 has 'character_list' => (
