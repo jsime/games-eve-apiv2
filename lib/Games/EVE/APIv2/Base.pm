@@ -49,6 +49,12 @@ has 'req' => (
     isa => 'Games::EVE::APIv2::Request',
 );
 
+has 'cached_until' => (
+    is     => 'rw',
+    isa    => 'Str',
+    traits => [qw( SetOnce )],
+);
+
 has 'character_list' => (
     is        => 'rw',
     isa       => 'ArrayRef[Games::EVE::APIv2::Character]',
