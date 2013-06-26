@@ -30,15 +30,17 @@ has 'v_code' => (
 );
 
 has 'access_mask' => (
-    is     => 'rw',
-    isa    => 'Int',
-    traits => [qw( SetOnce )],
+    is        => 'rw',
+    isa       => 'Int',
+    traits    => [qw( SetOnce )],
+    predicate => 'has_access_mask',
 );
 
 has 'key_type' => (
-    is     => 'rw',
-    isa    => 'Str',
-    traits => [qw( SetOnce )],
+    is        => 'rw',
+    isa       => 'Str',
+    traits    => [qw( SetOnce )],
+    predicate => 'has_key_type',
 );
 
 has 'expires' => (
