@@ -137,6 +137,16 @@ sub BUILD {
     my ($self) = @_;
 
     $self->req(Games::EVE::APIv2::Request->new( key_id => $self->key_id, v_code => $self->v_code));
+
+    my $xml = $self->req->get('account/APIKeyInfo');
+
+    $self->access_mask($xml->findvalue(q{//result/key/@accessMask[1]}));
+    $self->key_type(   $xml->findvalue(q{//result/key/@type[1]}));
+
+    my $expiration;
+    if ($expiration = $xml->findvalue(q{//result/key/@expires[1]})) {
+        $self->expires($expiration);
+    }
 }
 
 __PACKAGE__->meta->make_immutable;
