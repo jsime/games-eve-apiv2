@@ -131,6 +131,25 @@ The following methods and subroutines are not intended for use by applications,
 but are documented here for anyone hoping to chip away at the internal workings
 of this library.
 
+=head2 keyinfo
+
+Returns a hash of key information, intended only for internal use to prevent
+unnecessary remote API calls.
+
+=cut
+
+sub keyinfo {
+    my ($self) = @_;
+
+    my %info;
+
+    $info{'access_mask'} = $self->access_mask if $self->has_access_mask;
+    $info{'key_type'} = $self->key_type       if $self->has_key_type;
+    $info{'expires'} = $self->expires         if $self->has_expiration;
+
+    return %info;
+}
+
 =head2 BUILD
 
 Constructor hook. Instantiates a ::Request object with provided API keys.
