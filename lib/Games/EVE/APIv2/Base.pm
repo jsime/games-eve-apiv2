@@ -163,14 +163,18 @@ sub BUILD {
 
     $self->req(Games::EVE::APIv2::Request->new( key_id => $self->key_id, v_code => $self->v_code));
 
-    my $xml = $self->req->get('account/APIKeyInfo');
+    unless ($self->has_access_mask && $self->has_key_type && $self->has_expiration) {
+        my $xml = $self->req->get('account/APIKeyInfo');
 
-    $self->access_mask($xml->findvalue(q{//result/key/@accessMask}));
-    $self->key_type(   $xml->findvalue(q{//result/key/@type}));
+        $self->access_mask($xml->findvalue(q{//result/key/@accessMask})) unless $self->has_access_mask;
+        $self->key_type(   $xml->findvalue(q{//result/key/@type}))       unless $self->has_key_type;
 
-    my $expiration;
-    if ($expiration = $xml->findvalue(q{//result/key/@expires})) {
-        $self->expires($expiration);
+        unless ($self->has_expiration) {
+            my $expiration;
+            if ($expiration = $xml->findvalue(q{//result/key/@expires})) {
+                $self->expires($expiration);
+            }
+        }
     }
 }
 
