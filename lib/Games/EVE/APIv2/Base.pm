@@ -40,8 +40,9 @@ has 'key_type' => (
 );
 
 has 'expires' => (
-    is  => 'ro',
-    isa => 'DateTime',
+    is        => 'ro',
+    isa       => 'Str',
+    predicate => 'has_expiration',
 );
 
 has 'req' => (
@@ -140,11 +141,11 @@ sub BUILD {
 
     my $xml = $self->req->get('account/APIKeyInfo');
 
-    $self->access_mask($xml->findvalue(q{//result/key/@accessMask[1]}));
-    $self->key_type(   $xml->findvalue(q{//result/key/@type[1]}));
+    $self->access_mask($xml->findvalue(q{//result/key/@accessMask}));
+    $self->key_type(   $xml->findvalue(q{//result/key/@type}));
 
     my $expiration;
-    if ($expiration = $xml->findvalue(q{//result/key/@expires[1]})) {
+    if ($expiration = $xml->findvalue(q{//result/key/@expires})) {
         $self->expires($expiration);
     }
 }
