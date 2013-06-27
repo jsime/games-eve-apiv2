@@ -17,6 +17,10 @@ use Games::EVE::APIv2::Request;
 
 use Moose;
 use MooseX::SetOnce;
+
+use DateTime;
+use DateTime::Format::Strptime;
+
 use namespace::autoclean;
 
 has 'key_id' => (
@@ -57,9 +61,9 @@ has 'req' => (
 
 has 'cached_until' => (
     is        => 'rw',
-    isa       => 'Str',
+    isa       => 'DateTime',
     traits    => [qw( SetOnce )],
-    predicate => 'is_cached',
+    predicate => 'has_cached_until',
 );
 
 has 'character_list' => (
@@ -125,6 +129,21 @@ sub corporations {
     my ($self) = @_;
 
     return @{$self->corporation_list} if $self->has_corporations;
+}
+
+=head2 is_cached
+
+If the current API object has a cached_until attribute and the current time is
+earlier than the value of that attribute, this method will return true. In all
+other cases, including non-existence of the attribute, it will return false.
+
+=cut
+
+sub is_cached {
+    my ($self) = @_;
+
+    return 1 if $self->has_cached_until && $self->cached_until >= DateTime->now();
+    return 0;
 }
 
 =head1 INTERNAL SUBROUTINES
