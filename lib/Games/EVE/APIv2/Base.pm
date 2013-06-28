@@ -49,7 +49,7 @@ has 'key_type' => (
 
 has 'expires' => (
     is        => 'rw',
-    isa       => 'Str',
+    isa       => 'DateTime',
     traits    => [qw( SetOnce )],
     predicate => 'has_expiration',
 );
@@ -169,6 +169,26 @@ sub keyinfo {
     $info{'expires'} = $self->expires         if $self->has_expiration;
 
     return %info;
+}
+
+=head2 parse_datetime
+
+=cut
+
+sub parse_datetime {
+    my ($self, $datetime_str) = @_;
+
+    return unless defined $datetime_str;
+
+    my $parser = DateTime::Format::Strptime->new(
+        time_zone => 'UTC',
+        pattern => '%F %T'
+    );
+
+    my $dt = $parser->parse_datetime($datetime_str);
+
+    return $dt if defined $dt;
+    return;
 }
 
 =head2 BUILD
