@@ -26,9 +26,15 @@ has 'character_id' => (
     predicate => 'has_character_id',
 );
 
-has [qw( name dob race bloodline ancestry gender )] => (
+has [qw( name race bloodline ancestry gender )] => (
     is     => 'rw',
     isa    => 'Str',
+    traits => [qw( SetOnce )],
+);
+
+has [qw( dob )] => (
+    is     => 'rw',
+    isa    => 'DateTime',
     traits => [qw( SetOnce )],
 );
 
@@ -44,12 +50,14 @@ sub BUILD {
     my $xml = $self->req->get('char/CharacterSheet', characterID => $self->character_id);
 
     $self->name(     $xml->findvalue(q{//result/name[1]}));
-    $self->dob(      $xml->findvalue(q{//result/DoB[1]}));
     $self->race(     $xml->findvalue(q{//result/race[1]}));
     $self->bloodline($xml->findvalue(q{//result/bloodLine[1]}));
     $self->ancestry( $xml->findvalue(q{//result/ancestry[1]}));
     $self->gender(   $xml->findvalue(q{//result/gender[1]}));
     $self->balance(  $xml->findvalue(q{//result/balance[1]}));
+
+    my $dob = $self->parse_datetime($xml->findvalue(q{//result/DoB[1]}));
+    $self->dob($dob) if $dob;
 }
 
 sub corporations {
