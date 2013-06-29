@@ -44,6 +44,12 @@ has [qw( balance )] => (
     traits => [qw( SetOnce )],
 );
 
+has 'skill_list' => (
+    is     => 'rw',
+    isa    => 'ArrayRef[]',
+    traits => [qw( SetOnce )],
+);
+
 sub BUILD {
     my ($self) = @_;
 
@@ -58,6 +64,12 @@ sub BUILD {
 
     my $dob = $self->parse_datetime($xml->findvalue(q{//result/DoB[1]}));
     $self->dob($dob) if $dob;
+
+    my @skills;
+    my @skillnodes = $xml->findnodes(q{//result/rowset[@name='skills']/row});
+    foreach my $skillnode (@skillnodes) {
+        
+    }
 }
 
 sub corporations {
