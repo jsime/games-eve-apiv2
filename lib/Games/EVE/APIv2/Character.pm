@@ -45,9 +45,10 @@ has [qw( balance )] => (
 );
 
 has 'skill_list' => (
-    is     => 'rw',
-    isa    => 'ArrayRef[HashRef]',
-    traits => [qw( SetOnce )],
+    is        => 'rw',
+    isa       => 'ArrayRef[HashRef]',
+    traits    => [qw( SetOnce )],
+    predicate => 'has_skill_list',
 );
 
 sub BUILD {
@@ -99,6 +100,13 @@ sub corporations {
 
     $self->corporation_list(\@corps);
     return @corps;
+}
+
+sub skills {
+    my ($self) = @_;
+
+    return @{$self->skill_list} if $self->has_skill_list;
+    return;
 }
 
 __PACKAGE__->meta->make_immutable;
