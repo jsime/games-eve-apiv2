@@ -32,7 +32,7 @@ has [qw( name race bloodline ancestry gender )] => (
     traits => [qw( SetOnce )],
 );
 
-has 'certificates' => (
+has 'certificates_list' => (
     is     => 'rw',
     isa    => 'ArrayRef[Int]',
     traits => [qw( SetOnce )],
@@ -87,7 +87,7 @@ sub BUILD {
     my @certificates;
     push(@certificates, $_->findvalue(q{@certificateID}))
         for $xml->findnodes(q{//result/rowset[@name='certificates']/row});
-    $self->certificates(\@certificates);
+    $self->certificates_list(\@certificates);
 
     $self->cached_until($self->parse_datetime($xml->findvalue(q{//cachedUntil[1]})));
 }
@@ -119,6 +119,12 @@ sub skills {
 
     return @{$self->skill_list} if $self->has_skill_list;
     return;
+}
+
+sub certificates {
+    my ($self) = @_;
+
+    return @{$self->certificates_list};
 }
 
 __PACKAGE__->meta->make_immutable;
