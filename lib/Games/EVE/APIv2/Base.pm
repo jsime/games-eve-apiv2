@@ -173,6 +173,9 @@ sub keyinfo {
 
 =head2 parse_datetime
 
+Thin convenience wrapper around datetime parser, since all EVE API calls use a
+consistent datetime format, always in UTC, that's easily handled by strptime.
+
 =cut
 
 sub parse_datetime {
