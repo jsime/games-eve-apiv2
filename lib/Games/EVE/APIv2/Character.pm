@@ -46,7 +46,7 @@ has [qw( balance )] => (
 
 has 'skill_list' => (
     is     => 'rw',
-    isa    => 'ArrayRef[]',
+    isa    => 'ArrayRef[HashRef]',
     traits => [qw( SetOnce )],
 );
 
@@ -68,8 +68,15 @@ sub BUILD {
     my @skills;
     my @skillnodes = $xml->findnodes(q{//result/rowset[@name='skills']/row});
     foreach my $skillnode (@skillnodes) {
-        
+        push(@skills, {
+            skill_id     => $skillnode->findvalue(q{@typeID}),
+            level        => $skillnode->findvalue(q{@level}),
+            skill_points => $skillnode->findvalue(q{@skillpoints}),
+            published    => $skillnode->findvalue(q{@published}),
+        });
     }
+
+    $self->skill_list(\@skills);
 }
 
 sub corporations {
