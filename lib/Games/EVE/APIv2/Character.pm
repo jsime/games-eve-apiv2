@@ -78,6 +78,8 @@ sub BUILD {
     }
 
     $self->skill_list(\@skills);
+
+    $self->cached_until($self->parse_datetime($xml->findvalue(q{//cachedUntil[1]})));
 }
 
 sub corporations {
