@@ -32,6 +32,12 @@ has [qw( name race bloodline ancestry gender )] => (
     traits => [qw( SetOnce )],
 );
 
+has 'certificates' => (
+    is     => 'rw',
+    isa    => 'ArrayRef[Int]',
+    traits => [qw( SetOnce )],
+);
+
 has [qw( dob )] => (
     is     => 'rw',
     isa    => 'DateTime',
@@ -76,8 +82,12 @@ sub BUILD {
             published    => $skillnode->findvalue(q{@published}),
         });
     }
-
     $self->skill_list(\@skills);
+
+    my @certificates;
+    push(@certificates, $_->findvalue(q{@certificateID}))
+        for $xml->findnodes(q{//result/rowset[@name='certificates']/row});
+    $self->certificates(\@certificates);
 
     $self->cached_until($self->parse_datetime($xml->findvalue(q{//cachedUntil[1]})));
 }
