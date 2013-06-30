@@ -33,9 +33,10 @@ has [qw( name race bloodline ancestry gender )] => (
 );
 
 has 'certificates_list' => (
-    is     => 'rw',
-    isa    => 'ArrayRef[Int]',
-    traits => [qw( SetOnce )],
+    is        => 'rw',
+    isa       => 'ArrayRef[Int]',
+    traits    => [qw( SetOnce )],
+    predicate => 'has_certificate_list',
 );
 
 has [qw( dob )] => (
@@ -124,7 +125,8 @@ sub skills {
 sub certificates {
     my ($self) = @_;
 
-    return @{$self->certificates_list};
+    return @{$self->certificates_list} if $self->has_certificate_list;
+    return;
 }
 
 __PACKAGE__->meta->make_immutable;
