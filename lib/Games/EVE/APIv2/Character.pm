@@ -26,7 +26,7 @@ has 'character_id' => (
     predicate => 'has_character_id',
 );
 
-has [qw( name race bloodline ancestry gender )] => (
+has [qw( name race bloodline ancestry gender clone_name )] => (
     is     => 'rw',
     isa    => 'Str',
     traits => [qw( SetOnce )],
@@ -45,7 +45,7 @@ has [qw( dob )] => (
     traits => [qw( SetOnce )],
 );
 
-has [qw( balance )] => (
+has [qw( balance clone_skillpoints )] => (
     is     => 'rw',
     isa    => 'Num',
     traits => [qw( SetOnce )],
@@ -69,6 +69,9 @@ sub BUILD {
     $self->ancestry( $xml->findvalue(q{//result/ancestry[1]}));
     $self->gender(   $xml->findvalue(q{//result/gender[1]}));
     $self->balance(  $xml->findvalue(q{//result/balance[1]}));
+
+    $self->clone_name(       $xml->findvalue(q{//result/cloneName[1]}));
+    $self->clone_skillpoints($xml->findvalue(q{//result/cloneSkillPoints[1]}));
 
     my $dob = $self->parse_datetime($xml->findvalue(q{//result/DoB[1]}));
     $self->dob($dob) if $dob;
