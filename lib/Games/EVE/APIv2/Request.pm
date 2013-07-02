@@ -16,6 +16,7 @@ Using the C<get()> method is the primary interface for this module.
 use strict;
 use warnings FATAL => 'all';
 
+use Data::Dumper;
 use LWP::UserAgent;
 use URI::Escape;
 use XML::LibXML;
@@ -32,14 +33,14 @@ has 'api' => (
 
 has 'key_id' => (
     is        => 'rw',
-    isa       => 'Int',
+    isa       => 'Maybe[Int]',
     clearer   => 'clear_key_id',
     predicate => 'has_key_id',
 );
 
 has 'v_code' => (
     is        => 'rw',
-    isa       => 'Str',
+    isa       => 'Maybe[Str]',
     clearer   => 'clear_v_code',
     predicate => 'has_v_code',
 );
@@ -89,26 +90,36 @@ sub get {
     my %opts = @_;
     $api = $opts{'api'} if exists $opts{'api'};
 
-    die "Cannot call APIv2 without API path, Key ID and Verification Code"
-        unless defined $api && $self->has_key_id && $self->has_v_code;
+    # The following API calls cannot be made with key information (they don't
+    # require it, and will actually error out if given key info)
+    my @no_key_apis = qw(
+        eve/SkillTree
+    );
 
-    if (exists $opts{'key_id'}) {
-        $opts{'keyID'} = $opts{'key_id'};
-        delete $opts{'key_id'};
-    }
-    if (exists $opts{'v_code'}) {
-        $opts{'vCode'} = $opts{'v_code'};
-        delete $opts{'v_code'};
-    }
+    if (grep { $api eq $_ } @no_key_apis) {
+        %opts = ();
+    } else {
+        die "Cannot call APIv2 without API path, Key ID and Verification Code"
+            unless defined $api && $self->has_key_id && $self->has_v_code;
 
-    $opts{'keyID'} = $self->key_id if !exists $opts{'keyID'} && $self->has_key_id;
-    $opts{'vCode'} = $self->v_code if !exists $opts{'vCode'} && $self->has_v_code;
-    delete $opts{'api'} if exists $opts{'api'};
+        if (exists $opts{'key_id'}) {
+            $opts{'keyID'} = $opts{'key_id'};
+            delete $opts{'key_id'};
+        }
+        if (exists $opts{'v_code'}) {
+            $opts{'vCode'} = $opts{'v_code'};
+            delete $opts{'v_code'};
+        }
+
+        $opts{'keyID'} = $self->key_id if !exists $opts{'keyID'} && $self->has_key_id;
+        $opts{'vCode'} = $self->v_code if !exists $opts{'vCode'} && $self->has_v_code;
+        delete $opts{'api'} if exists $opts{'api'};
+    }
 
     die "Requested API method doesn't appear valid: $api" unless $api =~ m{^[a-z]+/[a-zA-Z]+$}o;
 
     my $api_url = 'https://api.eveonline.com/' . $api . '.xml.aspx?' .
-        join('&', map { uri_escape($_) . '=' . uri_escape($opts{$_}) } sort keys %opts);
+        (join('&', map { uri_escape($_) . '=' . uri_escape($opts{$_}) } sort keys %opts)) || '';
 
     my $ua = LWP::UserAgent->new();
     $ua->agent(sprintf('%s (%s %s)', $ua->_agent, 'Games::EVE::APIv2', $Games::EVE::APIv2::VERSION));
