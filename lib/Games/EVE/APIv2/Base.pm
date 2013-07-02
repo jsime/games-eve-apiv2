@@ -24,13 +24,15 @@ use DateTime::Format::Strptime;
 use namespace::autoclean;
 
 has 'key_id' => (
-    is  => 'ro',
-    isa => 'Num',
+    is        => 'ro',
+    isa       => 'Num',
+    predicate => 'has_key_id',
 );
 
 has 'v_code' => (
-    is  => 'ro',
-    isa => 'Str',
+    is        => 'ro',
+    isa       => 'Str',
+    predicate => 'has_v_code',
 );
 
 has 'access_mask' => (
@@ -205,16 +207,18 @@ sub BUILD {
 
     $self->req(Games::EVE::APIv2::Request->new( key_id => $self->key_id, v_code => $self->v_code));
 
-    unless ($self->has_access_mask && $self->has_key_type && $self->has_expiration) {
-        my $xml = $self->req->get('account/APIKeyInfo');
+    if ($self->has_key_id && $self->has_v_code) {
+        unless ($self->has_access_mask && $self->has_key_type && $self->has_expiration) {
+            my $xml = $self->req->get('account/APIKeyInfo');
 
-        $self->access_mask($xml->findvalue(q{//result/key/@accessMask})) unless $self->has_access_mask;
-        $self->key_type(   $xml->findvalue(q{//result/key/@type}))       unless $self->has_key_type;
+            $self->access_mask($xml->findvalue(q{//result/key/@accessMask})) unless $self->has_access_mask;
+            $self->key_type(   $xml->findvalue(q{//result/key/@type}))       unless $self->has_key_type;
 
-        unless ($self->has_expiration) {
-            my $expiration;
-            if ($expiration = $xml->findvalue(q{//result/key/@expires})) {
-                $self->expires($expiration);
+            unless ($self->has_expiration) {
+                my $expiration;
+                if ($expiration = $xml->findvalue(q{//result/key/@expires})) {
+                    $self->expires($expiration);
+                }
             }
         }
     }
