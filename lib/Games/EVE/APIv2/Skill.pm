@@ -50,17 +50,14 @@ has 'description' => (
 sub update_cache {
     my ($self) = @_;
 
-print STDERR " ** Updating SkillTree Cache...\n";
     my $xml = $self->req->get('eve/SkillTree');
 
-print STDERR " ** Got " . length($xml->toString) . " bytes of XML\n";
     my %groups;
     my %skills;
 
     foreach my $groupnode ($xml->findnodes(q{//result/rowset[@name='skillGroups']/row})) {
         $groups{$groupnode->findvalue(q{@groupID})} = $groupnode->findvalue(q{@groupName});
     }
-print STDERR " ** Found " . scalar(keys(%groups)) . " skill groups\n";
 
     foreach my $skillnode ($xml->findnodes(q{//rowset[@name='skills']/row})) {
         $skills{$skillnode->findvalue(q{@typeID})} = {
@@ -68,7 +65,6 @@ print STDERR " ** Found " . scalar(keys(%groups)) . " skill groups\n";
             description => $skillnode->findvalue(q{description[1]}),
         }
     }
-print STDERR " ** Found " . scalar(keys(%skills)) . " skills\n";
 
     $self->Cache({ groups => \%groups, skills => \%skills });
 }
