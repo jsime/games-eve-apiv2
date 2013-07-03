@@ -21,22 +21,6 @@ use namespace::autoclean;
 
 extends 'Games::EVE::APIv2::Base';
 
-# Override key_id and v_code attributes, since we don't/can't use them on SkillTree
-# API calls (you get a 403 forbidden from the CCP servers if you try to supply them).
-has 'key_id' => (
-    is        => 'rw',
-    isa       => 'Maybe[Any]',
-    traits    => [qw( SetOnce )],
-    predicate => 'has_key_id',
-);
-
-has 'v_code' => (
-    is        => 'rw',
-    isa       => 'Maybe[Any]',
-    traits    => [qw( SetOnce )],
-    predicate => 'has_v_code',
-);
-
 class_has 'Cache' => (
     is        => 'rw',
     isa       => 'HashRef[HashRef]',
