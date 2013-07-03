@@ -30,7 +30,7 @@ has 'key_id' => (
     predicate => 'has_key_id',
 );
 
-has 'v_id' => (
+has 'v_code' => (
     is        => 'rw',
     isa       => 'Maybe[Any]',
     traits    => [qw( SetOnce )],
