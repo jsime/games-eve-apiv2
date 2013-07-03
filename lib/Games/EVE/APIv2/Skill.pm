@@ -78,7 +78,7 @@ sub BUILD {
     if ($self->has_skill_id) {
         $skill_id = $self->skill_id;
     } elsif ($self->has_name) {
-        $skill_id = (grep { $self->Cache->{'skills'}{$_}{'name'} eq $self->name }
+        $skill_id = (grep { lc($self->Cache->{'skills'}{$_}{'name'}) eq lc($self->name) }
                         keys %{$self->Cache->{'skills'}})[0];
     }
 
