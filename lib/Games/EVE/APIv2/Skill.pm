@@ -47,6 +47,19 @@ has 'description' => (
     traits => [qw( SetOnce )],
 );
 
+foreach my $attr (qw( name description )) {
+    before $attr => sub { shift->check_cache($attr) }
+}
+
+sub check_cache {
+    my ($self, $attr) = @_;
+
+    my $has_attr = 'has_' . $attr;
+
+    return if $self->is_cached or $self->$has_attr;
+    $self->update_cache;
+}
+
 sub update_cache {
     my ($self) = @_;
 
