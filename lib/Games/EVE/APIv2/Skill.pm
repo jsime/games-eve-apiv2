@@ -42,13 +42,20 @@ has 'name' => (
 );
 
 has 'description' => (
-    is     => 'rw',
-    isa    => 'Str',
-    traits => [qw( SetOnce )],
+    is        => 'rw',
+    isa       => 'Str',
+    traits    => [qw( SetOnce )],
+    predicate => 'has_description',
 );
 
-foreach my $attr (qw( name description )) {
-    before $attr => sub { shift->check_cache($attr) }
+has 'check_called' => (
+    is      => 'rw',
+    isa     => 'Bool',
+    default => 0,
+);
+
+foreach my $attr (qw( skill_id name description )) {
+    before $attr => sub { $_[0]->check_called || $_[0]->check_cache($attr) }
 }
 
 sub check_cache {
@@ -56,12 +63,31 @@ sub check_cache {
 
     my $has_attr = 'has_' . $attr;
 
-    return if $self->is_cached or $self->$has_attr;
+    return if $self->is_cached || $self->$has_attr;
     $self->update_cache;
+    $self->check_called(1);
+
+    my $skill;
+    if ($self->has_skill_id && exists $self->Cache->{'skills'}{$self->skill_id}) {
+        $skill = $self->Cache->{'skills'}{$self->skill_id};
+    } elsif ($self->has_name) {
+        my $skill_id = (grep { lc($self->Cache->{'skills'}{$_}{'name'}) eq lc($self->name) }
+                            keys %{$self->Cache->{'skills'}})[0];
+        $skill = $self->Cache->{'skills'}{$skill_id}
+            if defined $skill_id && exists $self->Cache->{'skills'}{$skill_id};
+    }
+
+    return unless defined $skill;
+
+    $self->skill_id($skill->{'skill_id'}) unless $self->has_skill_id;
+    $self->name($skill->{'name'}) unless $self->has_name;
+    $self->description($skill->{'description'}) unless $self->has_description;
 }
 
 sub update_cache {
     my ($self) = @_;
+
+    return if $self->is_cached;
 
     my $xml = $self->req->get('eve/SkillTree');
 
@@ -73,7 +99,10 @@ sub update_cache {
     }
 
     foreach my $skillnode ($xml->findnodes(q{//rowset[@name='skills']/row})) {
-        $skills{$skillnode->findvalue(q{@typeID})} = {
+        my $skill_id = $skillnode->findvalue(q{@typeID});
+
+        $skills{$skill_id} = {
+            skill_id    => $skill_id,
             name        => $skillnode->findvalue(q{@typeName}),
             description => $skillnode->findvalue(q{description[1]}),
         }
@@ -85,6 +114,7 @@ sub update_cache {
 sub BUILD {
     my ($self) = @_;
 
+=begin lazify
     $self->update_cache unless $self->is_cached;
 
     my $skill_id;
@@ -103,6 +133,7 @@ sub BUILD {
     $self->skill_id($skill_id) unless $self->has_skill_id;
     $self->name($skill->{'name'}) unless $self->has_name;
     $self->description($skill->{'description'});
+=cut
 }
 
 __PACKAGE__->meta->make_immutable;
