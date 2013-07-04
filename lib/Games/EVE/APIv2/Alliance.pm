@@ -113,7 +113,7 @@ sub update_cache {
 
     return if $self->is_cached;
 
-    my $xml = $self->req->get('eve/AllianceTree');
+    my $xml = $self->req->get('eve/AllianceList');
 
     my %alliances;
 
