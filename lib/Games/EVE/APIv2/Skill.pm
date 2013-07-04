@@ -114,26 +114,6 @@ sub update_cache {
 sub BUILD {
     my ($self) = @_;
 
-=begin lazify
-    $self->update_cache unless $self->is_cached;
-
-    my $skill_id;
-    if ($self->has_skill_id) {
-        $skill_id = $self->skill_id;
-    } elsif ($self->has_name) {
-        $skill_id = (grep { lc($self->Cache->{'skills'}{$_}{'name'}) eq lc($self->name) }
-                        keys %{$self->Cache->{'skills'}})[0];
-    }
-
-    die "Cannot look up skill with at least an ID or a name." unless defined $skill_id;
-    die "Invalid Skill ID: $skill_id" unless exists $self->Cache->{'skills'}{$skill_id};
-
-    my $skill = $self->Cache->{'skills'}{$skill_id};
-
-    $self->skill_id($skill_id) unless $self->has_skill_id;
-    $self->name($skill->{'name'}) unless $self->has_name;
-    $self->description($skill->{'description'});
-=cut
 }
 
 __PACKAGE__->meta->make_immutable;
