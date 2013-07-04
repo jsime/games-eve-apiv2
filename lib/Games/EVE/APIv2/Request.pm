@@ -93,6 +93,8 @@ sub get {
     # The following API calls cannot be made with key information (they don't
     # require it, and will actually error out if given key info)
     my @no_key_apis = qw(
+        eve/AllianceList
+        eve/CertificateTree
         eve/SkillTree
     );
 
