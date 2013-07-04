@@ -111,11 +111,6 @@ sub update_cache {
     $self->Cache({ groups => \%groups, skills => \%skills });
 }
 
-sub BUILD {
-    my ($self) = @_;
-
-}
-
 __PACKAGE__->meta->make_immutable;
 
 1;
