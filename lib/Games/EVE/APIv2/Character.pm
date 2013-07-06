@@ -20,11 +20,50 @@ use namespace::autoclean;
 
 extends 'Games::EVE::APIv2::Base';
 
+=head1 ATTRIBUTE METHODS
+
+The following attribute methods are provided (or overridden) by this class, in
+addition to those provided by the base class.
+
+=cut
+
+=head2 character_id
+
+The CCP-supplied Character ID represented by the object.
+
+=cut
+
 has 'character_id' => (
     is        => 'ro',
     isa       => 'Num',
     predicate => 'has_character_id',
 );
+
+=head2 name
+
+The character's name.
+
+=head2 race
+
+The character's race.
+
+=head2 bloodline
+
+The character's bloodline.
+
+=head2 ancestry
+
+The character's ancestry.
+
+=head2 gender
+
+The character's gender.
+
+=head2 clone_name
+
+The name of the character's current medical clone grade.
+
+=cut
 
 has [qw( name race bloodline ancestry gender clone_name )] => (
     is     => 'rw',
@@ -39,11 +78,27 @@ has 'certificates_list' => (
     predicate => 'has_certificate_list',
 );
 
+=head2 dob
+
+DateTime object representing the date of birth for the character.
+
+=cut
+
 has [qw( dob )] => (
     is     => 'rw',
     isa    => 'DateTime',
     traits => [qw( SetOnce )],
 );
+
+=head2 balance
+
+Decimal value of the character's current ISK balance.
+
+=head2 clone_skillpoints
+
+The total number of skill points supported by the character's current medical clone.
+
+=cut
 
 has [qw( balance clone_skillpoints )] => (
     is     => 'rw',
@@ -57,6 +112,13 @@ has 'skill_list' => (
     traits    => [qw( SetOnce )],
     predicate => 'has_skill_list',
 );
+
+=head1 INTERNAL METHODS
+
+The following methods are for internal use only and should not be called by
+applications using this library.
+
+=cut
 
 sub BUILD {
     my ($self) = @_;
@@ -96,6 +158,28 @@ sub BUILD {
     $self->cached_until($self->parse_datetime($xml->findvalue(q{//cachedUntil[1]})));
 }
 
+=head1 METHODS
+
+The following non-attribute methods are provided, or overridden, by this class.
+
+=cut
+
+=head2 corporations
+
+Returns a list of Games::EVE::APIv2::Corporation objects representing the
+employment history of the character. This overrides the C<corporations> method
+from the base class.
+
+Note that Corporation objects created via this method gain an additional
+pair of attributes, C<start_date> and C<end_date>, which define the period of
+employment for the character with that corporation.
+
+Keep in mind that there may be duplication of corporations in this list, as a
+single pilot may have joined, left, and rejoined a single corporation more than
+once.
+
+=cut
+
 sub corporations {
     my ($self) = @_;
 
@@ -118,12 +202,32 @@ sub corporations {
     return @corps;
 }
 
+=head2 skills
+
+Returns a list of Games::EVE::APIv2::Skill objects representing the skills trained
+by the character.
+
+As with the corporations method, objects created from here gain methods not normally
+present when instantiating a Skill object directly. In this case, the methods are:
+C<level> and C<skillpoints_trained>. These indicate the current level of training
+finished by the character and the total number of skillpoints accumulated for the
+given skill, respectively.
+
+=cut
+
 sub skills {
     my ($self) = @_;
 
     return @{$self->skill_list} if $self->has_skill_list;
     return;
 }
+
+=head2 certificates
+
+Returns a list of Games::EVE::APIv2::Certificate objects representing the certificates
+earned by the character.
+
+=cut
 
 sub certificates {
     my ($self) = @_;
