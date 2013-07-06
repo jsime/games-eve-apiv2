@@ -19,11 +19,24 @@ use namespace::autoclean;
 
 extends 'Games::EVE::APIv2::Base';
 
+=head1 ATTRIBUTE METHODS
+
+The following attribute methods are provided (or overridden) by this class, in
+addition to those provided by the base class.
+
+=cut
+
 class_has 'Cache' => (
     is        => 'rw',
     isa       => 'HashRef[HashRef]',
     predicate => 'is_cached'
 );
+
+=head2 alliance_id
+
+The CCP-supplied Alliance ID.
+
+=cut
 
 has 'alliance_id' => (
     is        => 'rw',
@@ -32,12 +45,24 @@ has 'alliance_id' => (
     predicate => 'has_alliance_id',
 );
 
+=head2 name
+
+The alliance's full name.
+
+=cut
+
 has 'name' => (
     is        => 'rw',
     isa       => 'Str',
     traits    => [qw( SetOnce )],
     predicate => 'has_name',
 );
+
+=head2 short_name
+
+The alliance's short name.
+
+=cut
 
 has 'short_name' => (
     is        => 'rw',
@@ -46,12 +71,25 @@ has 'short_name' => (
     predicate => 'has_short_name',
 );
 
+=head2 executor
+
+Games::EVE::APIv2::Corporation object for the executor corporation for
+the alliance.
+
+=cut
+
 has 'executor' => (
     is        => 'rw',
     isa       => 'Int',
     traits    => [qw( SetOnce )],
     predicate => 'has_executor',
 );
+
+=head2 founded
+
+DateTime object representing the date and time of the alliance's creation.
+
+=cut
 
 has 'founded' => (
     is        => 'rw',
@@ -69,6 +107,21 @@ has 'check_called' => (
 foreach my $attr (qw( alliance_id name short_name executor founded )) {
     before $attr => sub { $_[0]->check_called || $_[0]->check_cache($attr) }
 }
+
+=head1 INTERNAL METHODS
+
+The following methods are for internal use only and should not be called by
+applications using this library.
+
+=cut
+
+=head2 check_cache
+
+On invocation of the attribute methods, this is called to verify that the cache
+has already been populated. This allows the remote API call to be deferred
+until it is actually necessary.
+
+=cut
 
 sub check_cache {
     my ($self, $attr) = @_;
@@ -107,6 +160,15 @@ sub check_cache {
             corporation_id => $alliance->{'executor'},
         )) unless $self->has_executor;
 }
+
+=head2 update_cache
+
+Populates the class attribute cache from the remote API. Short-circuits if the cache
+has been populated before. The alliances in-game change considerably more frequent
+than things like skill and certificate trees, but the remote API returns a very
+significant amount of data.
+
+=cut
 
 sub update_cache {
     my ($self) = @_;
