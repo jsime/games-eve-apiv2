@@ -34,18 +34,46 @@ has 'certificate_id' => (
     predicate => 'has_certificate_id',
 );
 
-has 'name' => (
-    is        => 'rw',
-    isa       => 'Str',
-    traits    => [qw( SetOnce )],
-    predicate => 'has_name',
-);
-
 has 'description' => (
     is        => 'rw',
     isa       => 'Str',
     traits    => [qw( SetOnce )],
     predicate => 'has_description',
+);
+
+has 'grade' => (
+    is        => 'rw',
+    isa       => 'Int',
+    traits    => [qw( SetOnce )],
+    predicate => 'has_grade',
+);
+
+has 'category_id' => (
+    is        => 'rw',
+    isa       => 'Int',
+    traits    => [qw( SetOnce )],
+    predicate => 'has_category_id',
+);
+
+has 'category_name' => (
+    is        => 'rw',
+    isa       => 'Str',
+    traits    => [qw( SetOnce )],
+    predicate => 'has_category_name',
+);
+
+has 'class_id' => (
+    is        => 'rw',
+    isa       => 'Int',
+    traits    => [qw( SetOnce )],
+    predicate => 'has_class_id',
+);
+
+has 'class_name' => (
+    is        => 'rw',
+    isa       => 'Str',
+    traits    => [qw( SetOnce )],
+    predicate => 'has_class_name',
 );
 
 has 'check_called' => (
@@ -54,7 +82,7 @@ has 'check_called' => (
     default => 0,
 );
 
-foreach my $attr (qw( certificate_id name description )) {
+foreach my $attr (qw( certificate_id description grade category_id category_name class_id class_name )) {
     before $attr => sub { $_[0]->check_called || $_[0]->check_cache($attr) }
 }
 
@@ -70,18 +98,21 @@ sub check_cache {
     my $certificate;
     if ($self->has_certificate_id && exists $self->Cache->{'certificates'}{$self->certificate_id}) {
         $certificate = $self->Cache->{'certificates'}{$self->certificate_id};
-    } elsif ($self->has_name) {
-        my $certificate_id = (grep { lc($self->Cache->{'certificates'}{$_}{'name'}) eq lc($self->name) }
-                                  keys %{$self->Cache->{'certificates'}})[0];
-        $certificate = $self->Cache->{'certificates'}{$certificate_id}
-            if defined $certificate_id && exists $self->Cache->{'certificates'}{$certificate_id};
     }
 
     return unless defined $certificate;
 
     $self->certificate_id($certificate->{'certificate_id'}) unless $self->has_certificate_id;
-    $self->name($certificate->{'name'}) unless $self->has_name;
     $self->description($certificate->{'description'}) unless $self->has_description;
+    $self->grade($certificate->{'grade'}) unless $self->has_grade;
+
+    $self->category_id($certificate->{'category_id'}) unless $self->has_category_id;
+    $self->category_name($self->Cache->{'categories'}{$certificate->{'category_id'}})
+        unless $self->has_category_name;
+
+    $self->class_id($certificate->{'class_id'}) unless $self->has_class_id;
+    $self->class_name($self->Cache->{'classes'}{$certificate->{'class_id'}})
+        unless $self->has_class_name;
 }
 
 sub update_cache {
@@ -92,23 +123,36 @@ sub update_cache {
     my $xml = $self->req->get('eve/CertificateTree');
 
     my %categories;
+    my %classes;
     my %certificates;
 
     foreach my $categorynode ($xml->findnodes(q{//result/rowset[@name='categories']/row})) {
-        $categories{$categorynode->findvalue(q{@categoryID})} = $categorynode->findvalue(q{@categoryName});
-    }
+        my $category_id = $categorynode->findvalue(q{@categoryID});
+        my $category_name = $categorynode->findvalue(q{@categoryName});
 
-    foreach my $certificatenode ($xml->findnodes(q{//rowset[@name='certificates']/row})) {
-        my $certificate_id = $certificatenode->findvalue(q{@certificateID});
+        $categories{$category_id} = $category_name;
 
-        $certificates{$certificate_id} = {
-            certificate_id => $certificate_id,
-            grade          => $certificatenode->findvalue(q{@grade}),
-            description    => $certificatenode->findvalue(q{@description}),
+        foreach my $classnode ($categorynode->findnodes(q{rowset[@name='classes']/row})) {
+            my $class_id = $classnode->findvalue(q{@classID});
+            my $class_name = $classnode->findvalue(q{@className});
+
+            $classes{$class_id} = $class_name;
+
+            foreach my $certificatenode ($classnode->findnodes(q{rowset[@name='certificates']/row})) {
+                my $certificate_id = $certificatenode->findvalue(q{@certificateID});
+
+                $certificates{$certificate_id} = {
+                    certificate_id => $certificate_id,
+                    grade          => $certificatenode->findvalue(q{@grade}),
+                    description    => $certificatenode->findvalue(q{@description}),
+                    category_id    => $category_id,
+                    class_id       => $class_id,
+                };
+            }
         }
     }
 
-    $self->Cache({ categories => \%categories, certificates => \%certificates });
+    $self->Cache({ categories => \%categories, classes => \%classes, certificates => \%certificates });
 }
 
 __PACKAGE__->meta->make_immutable;
