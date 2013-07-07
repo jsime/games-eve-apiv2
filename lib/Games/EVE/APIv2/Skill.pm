@@ -131,8 +131,8 @@ sub check_cache {
 
     my $has_attr = 'has_' . $attr;
 
-    return if $self->is_cached || $self->$has_attr;
-    $self->update_cache;
+    return if $self->is_cached && $self->$has_attr;
+    $self->update_cache unless $self->is_cached;
     $self->check_called(1);
 
     my $skill;
