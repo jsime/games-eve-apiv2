@@ -74,7 +74,7 @@ sub check_cache {
         my $certificate_id = (grep { lc($self->Cache->{'certificates'}{$_}{'name'}) eq lc($self->name) }
                                   keys %{$self->Cache->{'certificates'}})[0];
         $certificate = $self->Cache->{'certificates'}{$certificate_id}
-            if defined $certificate_id && exists $self->Cache->{'certificates'}{$certififcate_id};
+            if defined $certificate_id && exists $self->Cache->{'certificates'}{$certificate_id};
     }
 
     return unless defined $certificate;
