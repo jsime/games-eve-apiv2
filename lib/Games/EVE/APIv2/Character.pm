@@ -108,7 +108,7 @@ has [qw( balance clone_skillpoints )] => (
 
 has 'skill_list' => (
     is        => 'rw',
-    isa       => 'ArrayRef[HashRef]',
+    isa       => 'ArrayRef[Games::EVE::APIv2::Skill]',
     traits    => [qw( SetOnce )],
     predicate => 'has_skill_list',
 );
@@ -141,12 +141,12 @@ sub BUILD {
     my @skills;
     my @skillnodes = $xml->findnodes(q{//result/rowset[@name='skills']/row});
     foreach my $skillnode (@skillnodes) {
-        push(@skills, {
-            skill_id     => $skillnode->findvalue(q{@typeID}),
-            level        => $skillnode->findvalue(q{@level}),
-            skill_points => $skillnode->findvalue(q{@skillpoints}),
-            published    => $skillnode->findvalue(q{@published}),
-        });
+        push(@skills, Games::EVE::APIv2::Skill->new(
+            $self->keyinfo,
+            skill_id    => $skillnode->findvalue(q{@typeID}),
+            level       => $skillnode->findvalue(q{@level}),
+            skillpoints_trained => $skillnode->findvalue(q{@skillpoints}),
+        ));
     }
     $self->skill_list(\@skills);
 
@@ -192,7 +192,7 @@ sub corporations {
     foreach my $corpnode (@nodes) {
         push(@corps,
             Games::EVE::APIv2::Corporation->new(
-                key_id => $self->key_id, v_code => $self->v_code,
+                $self->keyinfo,
                 corporation_id => $corpnode->findvalue(q{@corporationID}),
             )
         );
