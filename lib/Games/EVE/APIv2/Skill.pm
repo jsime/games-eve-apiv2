@@ -73,6 +73,34 @@ has 'description' => (
     predicate => 'has_description',
 );
 
+=head2 level
+
+The trained level of the skill. Available only when Skill object was created through
+a call to a Character's C<skills> method.
+
+=cut
+
+has 'level' => (
+    is        => 'rw',
+    isa       => 'Int',
+    traits    => [qw( SetOnce )],
+    predicate => 'has_level',
+);
+
+=head2 skillpoints_trained
+
+The number of skillpoints accumulated in training for this skill. Available only
+when Skill object created through a call to a Character's C<skills> method.
+
+=cut
+
+has 'skillpoints_trained' => (
+    is        => 'rw',
+    isa       => 'Int',
+    traits    => [qw( SetOnce )],
+    predicate => 'has_skillpoints_trained',
+);
+
 has 'check_called' => (
     is      => 'rw',
     isa     => 'Bool',
