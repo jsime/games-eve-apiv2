@@ -73,7 +73,7 @@ has [qw( name race bloodline ancestry gender clone_name )] => (
 
 has 'certificates_list' => (
     is        => 'rw',
-    isa       => 'ArrayRef[Int]',
+    isa       => 'ArrayRef[Games::EVE::APIv2::Certificate]',
     traits    => [qw( SetOnce )],
     predicate => 'has_certificate_list',
 );
@@ -151,8 +151,10 @@ sub BUILD {
     $self->skill_list(\@skills);
 
     my @certificates;
-    push(@certificates, $_->findvalue(q{@certificateID}))
-        for $xml->findnodes(q{//result/rowset[@name='certificates']/row});
+    push(@certificates, Games::EVE::APIv2::Certificate->new(
+            $self->keyinfo,
+            certificate_id => $_->findvalue(q{@certificateID}),
+        )) for $xml->findnodes(q{//result/rowset[@name='certificates']/row});
     $self->certificates_list(\@certificates);
 
     $self->cached_until($self->parse_datetime($xml->findvalue(q{//cachedUntil[1]})));
