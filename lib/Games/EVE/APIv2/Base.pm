@@ -20,6 +20,7 @@ use MooseX::SetOnce;
 
 use DateTime;
 use DateTime::Format::Strptime;
+use DateTime::Infinite;
 
 use namespace::autoclean;
 
@@ -106,9 +107,8 @@ sub characters {
 
     foreach my $char_id ($xml->find(q{//result/rowset[@name='characters']/row/@characterID})) {
         push(@chars, Games::EVE::APIv2::Character->new(
+                $self->keyinfo,
                 character_id => "$char_id",
-                key_id       => $self->key_id,
-                v_code       => $self->v_code
         ));
     }
 
@@ -166,6 +166,8 @@ sub keyinfo {
 
     my %info;
 
+    $info{'key_id'} = $self->key_id           if $self->has_key_id;
+    $info{'v_code'} = $self->v_code           if $self->has_v_code;
     $info{'access_mask'} = $self->access_mask if $self->has_access_mask;
     $info{'key_type'} = $self->key_type       if $self->has_key_type;
     $info{'expires'} = $self->expires         if $self->has_expiration;
@@ -217,7 +219,9 @@ sub BUILD {
             unless ($self->has_expiration) {
                 my $expiration;
                 if ($expiration = $xml->findvalue(q{//result/key/@expires})) {
-                    $self->expires($expiration);
+                    $self->expires($self->parse_datetime($expiration));
+                } else {
+                    $self->expires(DateTime::Infinite::Future->new());
                 }
             }
         }
