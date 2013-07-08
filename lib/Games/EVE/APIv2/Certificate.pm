@@ -21,6 +21,13 @@ use namespace::autoclean;
 
 extends 'Games::EVE::APIv2::Base';
 
+=head1 ATTRIBUTE METHODS
+
+The following attribute methods are provided (or overridden) by this class, in
+addition to those provided by the base class.
+
+=cut
+
 class_has 'Cache' => (
     is        => 'rw',
     isa       => 'HashRef[HashRef]',
@@ -100,6 +107,21 @@ foreach my $attr (qw( certificate_id description grade category_id category_name
     before $attr => sub { $_[0]->check_called || $_[0]->check_cache($attr) }
 }
 
+=head1 INTERNAL METHODS
+
+The following methods are for internal use only and should not be called by
+applications using this library.
+
+=cut
+
+=head2 check_cache
+
+On invocation of the attribute methods, this is called to verify that the cache
+has already been populated. This allows the remote API call to be deferred
+until it is actually necessary.
+
+=cut
+
 sub check_cache {
     my ($self, $attr) = @_;
 
@@ -131,6 +153,14 @@ sub check_cache {
     $self->required_certificates($certificate->{'certificates'}) unless $self->has_required_certificates;
     $self->required_skills($certificate->{'skills'}) unless $self->has_required_skills;
 }
+
+=head2 update_cache
+
+Populates the class attribute cache from the remote API. Short-circuits if the cache
+has been populated before. The certificate tree changes so rarely, that calling the
+remote API should be done as rarely as possible.
+
+=cut
 
 sub update_cache {
     my ($self) = @_;
