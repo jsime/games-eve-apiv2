@@ -76,11 +76,18 @@ has 'class_name' => (
     predicate => 'has_class_name',
 );
 
+has 'required_certificates' => (
+    is        => 'rw',
+    isa       => 'ArrayRef[Games::EVE::APIv2::Certificate]',
+    traits    => [qw( SetOnce )],
+    predicate => 'has_required_certificates',
+);
+
 has 'required_skills' => (
-    is         => 'rw',
-    isa        => 'ArrayRef[Games::EVE::APIv2::Skill]',
-    traits     => [qw( SetOnce )],
-    predicates => 'has_required_skills',
+    is        => 'rw',
+    isa       => 'ArrayRef[Games::EVE::APIv2::Skill]',
+    traits    => [qw( SetOnce )],
+    predicate => 'has_required_skills',
 );
 
 has 'check_called' => (
@@ -89,7 +96,7 @@ has 'check_called' => (
     default => 0,
 );
 
-foreach my $attr (qw( certificate_id description grade category_id category_name class_id class_name )) {
+foreach my $attr (qw( certificate_id description grade category_id category_name class_id class_name required_certificates required_skills )) {
     before $attr => sub { $_[0]->check_called || $_[0]->check_cache($attr) }
 }
 
@@ -120,6 +127,9 @@ sub check_cache {
     $self->class_id($certificate->{'class_id'}) unless $self->has_class_id;
     $self->class_name($self->Cache->{'classes'}{$certificate->{'class_id'}})
         unless $self->has_class_name;
+
+    $self->required_certificates($certificate->{'certificates'}) unless $self->has_required_certificates;
+    $self->required_skills($certificate->{'skills'}) unless $self->has_required_skills;
 }
 
 sub update_cache {
@@ -154,7 +164,29 @@ sub update_cache {
                     description    => $certificatenode->findvalue(q{@description}),
                     category_id    => $category_id,
                     class_id       => $class_id,
+                    certificates   => [],
+                    skills         => [],
                 };
+
+                foreach my $reqcertnode ($certificatenode->findnodes(q{rowset[@name='requiredCertificates']/row})) {
+                    push(@{$certificates{$certificate_id}{'certificates'}},
+                        Games::EVE::APIv2::Certificate->new(
+                            $self->keyinfo,
+                            certificate_id => $reqcertnode->findvalue(q{@certificateID}),
+                            grade          => $reqcertnode->findvalue(q{@grade}),
+                        )
+                    );
+                }
+
+                foreach my $skillnode ($certificatenode->findnodes(q{rowset[@name='requiredSkills']/row})) {
+                    push(@{$certificates{$certificate_id}{'skills'}},
+                        Games::EVE::APIv2::Skill->new(
+                            $self->keyinfo,
+                            skill_id => $skillnode->findvalue(q{@typeID}),
+                            level    => $skillnode->findvalue(q{@level}),
+                        )
+                    );
+                }
             }
         }
     }
