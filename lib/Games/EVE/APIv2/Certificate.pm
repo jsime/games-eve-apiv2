@@ -76,6 +76,13 @@ has 'class_name' => (
     predicate => 'has_class_name',
 );
 
+has 'required_skills' => (
+    is         => 'rw',
+    isa        => 'ArrayRef[Games::EVE::APIv2::Skill]',
+    traits     => [qw( SetOnce )],
+    predicates => 'has_required_skills',
+);
+
 has 'check_called' => (
     is      => 'rw',
     isa     => 'Bool',
