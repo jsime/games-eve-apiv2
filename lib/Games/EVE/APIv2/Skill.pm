@@ -101,6 +101,21 @@ has 'skillpoints_trained' => (
     predicate => 'has_skillpoints_trained',
 );
 
+=head2 required_skills
+
+Returns Skill objects representing the list of skill pre-requisites for this Skill.
+Skill objects from this list will have the additional C<level> attribute, indicating
+the minimum necessary level of the pre-requisite.
+
+=cut
+
+has 'required_skills' => (
+    is        => 'rw',
+    isa       => 'ArrayRef[Games::EVE::APIv2::Skill]',
+    traits    => [qw( SetOnce )],
+    predicate => 'has_required_skills',
+);
+
 has 'check_called' => (
     is      => 'rw',
     isa     => 'Bool',
@@ -150,6 +165,16 @@ sub check_cache {
     $self->skill_id($skill->{'skill_id'}) unless $self->has_skill_id;
     $self->name($skill->{'name'}) unless $self->has_name;
     $self->description($skill->{'description'}) unless $self->has_description;
+
+    my @required_skills;
+    foreach my $reqskill (@{$skill->{'skills'}}) {
+        push(@required_skills, Games::EVE::APIv2::Skill->new(
+            $self->keyinfo,
+            skill_id => $reqskill->{'skill_id'},
+            level    => $reqskill->{'level'},
+        ));
+    }
+    $self->required_skills(\@required_skills);
 }
 
 =head2 update_cache
@@ -181,6 +206,14 @@ sub update_cache {
             skill_id    => $skill_id,
             name        => $skillnode->findvalue(q{@typeName}),
             description => $skillnode->findvalue(q{description[1]}),
+            skills      => [],
+        };
+
+        foreach my $reqskillnode ($skillnode->findnodes(q{rowset[@name='requiredSkills']/row})) {
+            push(@{$skills{$skill_id}{'skills'}}, {
+                skill_id => $reqskillnode->findvalue(q{@typeID}),
+                level    => $reqskillnode->findvalue(q{@skillLevel})
+            });
         }
     }
 
