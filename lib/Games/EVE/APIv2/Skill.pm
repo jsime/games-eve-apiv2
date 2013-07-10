@@ -73,6 +73,19 @@ has 'description' => (
     predicate => 'has_description',
 );
 
+=head2 rank
+
+The skill's rank.
+
+=cut
+
+has 'rank' => (
+    is        => 'rw',
+    isa       => 'Int',
+    traits    => [qw( SetOnce )],
+    predicate => 'has_rank',
+);
+
 =head2 level
 
 The trained level of the skill. Available only when Skill object was created through
@@ -116,13 +129,51 @@ has 'required_skills' => (
     predicate => 'has_required_skills',
 );
 
+=head2 position
+
+Present only when the Skill object was created through a call to a Character's
+C<skill_queue> method. Indicates the position (beginning from zero) of the
+Skill in the character's current queue.
+
+=cut
+
+has 'position' => (
+    is        => 'rw',
+    isa       => 'Int',
+    traits    => [qw( SetOnce )],
+    predicate => 'has_position',
+);
+
+=head2 start_time, end_time
+
+Present only when the Skill object was created through a call to a Character's
+C<skill_queue> method. If the character's skill training is paused, these will
+be undefined. If the character is actively training, these will return DateTime
+objects representing the queued start and end times of the Skill in the queue.
+
+=cut
+
+has 'start_time' => (
+    is        => 'rw',
+    isa       => 'DateTime',
+    traits    => [qw( SetOnce )],
+    predicate => 'has_start_time',
+);
+
+has 'end_time' => (
+    is        => 'rw',
+    isa       => 'DateTime',
+    traits    => [qw( SetOnce )],
+    predicate => 'has_end_time',
+);
+
 has 'check_called' => (
     is      => 'rw',
     isa     => 'Bool',
     default => 0,
 );
 
-foreach my $attr (qw( skill_id name description )) {
+foreach my $attr (qw( skill_id name description rank required_skills )) {
     before $attr => sub { $_[0]->check_called || $_[0]->check_cache($attr) }
 }
 
@@ -165,6 +216,7 @@ sub check_cache {
     $self->skill_id($skill->{'skill_id'}) unless $self->has_skill_id;
     $self->name($skill->{'name'}) unless $self->has_name;
     $self->description($skill->{'description'}) unless $self->has_description;
+    $self->rank($skill->{'rank'}) unless $self->has_rank;
 
     my @required_skills;
     foreach my $reqskill (@{$skill->{'skills'}}) {
@@ -206,6 +258,7 @@ sub update_cache {
             skill_id    => $skill_id,
             name        => $skillnode->findvalue(q{@typeName}),
             description => $skillnode->findvalue(q{description[1]}),
+            rank        => $skillnode->findvalue(q{rank[1]}),
             skills      => [],
         };
 
