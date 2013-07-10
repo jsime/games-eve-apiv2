@@ -113,6 +113,13 @@ has 'skill_list' => (
     predicate => 'has_skill_list',
 );
 
+has 'skill_queue_list' => (
+    is        => 'rw',
+    isa       => 'ArrayRef[Games::EVE::APIv2::Skill]',
+    traits    => [qw( SetOnce )],
+    predicate => 'has_skill_queue_list',
+);
+
 =head1 INTERNAL METHODS
 
 The following methods are for internal use only and should not be called by
@@ -236,6 +243,39 @@ sub certificates {
 
     return @{$self->certificates_list} if $self->has_certificate_list;
     return;
+}
+
+=head2 skill_queue
+
+=cut
+
+sub skill_queue {
+    my ($self) = @_;
+
+    return @{$self->skill_queue_list} if $self->has_skill_queue_list;
+
+    my $xml = $self->req->get('char/SkillQueue', characterID => $self->character_id);
+
+    my @queue;
+    foreach my $skillnode ($xml->findnodes(q{//result/rowset[@name='skillqueue']/row})) {
+        push(@queue, Games::EVE::APIv2::Skill->new(
+            $self->keyinfo,
+            skill_id   => $skillnode->findvalue(q{@typeID}),
+            position   => $skillnode->findvalue(q{@queuePosition}),
+            level      => $skillnode->findvalue(q{@level}),
+        ));
+
+        # if the queue is paused, skills will have null startTime and endTime attributes,
+        # so we can't blindly pass them into the Skill object.
+        my $start_time = $skillnode->findvalue(q{@startTime});
+        $queue[-1]{'start_time'} = $self->parse_datetime($start_time) if $start_time;
+
+        my $end_time = $skillnode->findvalue(q{@endTime});
+        $queue[-1]{'end_time'} = $self->parse_datetime($end_time) if $end_time;
+    }
+
+    $self->skill_queue_list(\@queue);
+    return @queue;
 }
 
 __PACKAGE__->meta->make_immutable;
