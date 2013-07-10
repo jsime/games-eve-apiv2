@@ -16,3 +16,4 @@ pod2htm*.tmp
 pm_to_blib
 Games-EVE-APIv2-*
 Games-EVE-APIv2-*.tar.gz
+*.swp
