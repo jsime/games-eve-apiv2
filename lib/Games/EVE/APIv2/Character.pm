@@ -155,14 +155,14 @@ sub BUILD {
             skillpoints_trained => $skillnode->findvalue(q{@skillpoints}),
         ));
     }
-    $self->skill_list(\@skills);
+    $self->skill_list(\@skills) if @skills > 0;
 
     my @certificates;
     push(@certificates, Games::EVE::APIv2::Certificate->new(
             $self->keyinfo,
             certificate_id => $_->findvalue(q{@certificateID}),
         )) for $xml->findnodes(q{//result/rowset[@name='certificates']/row});
-    $self->certificates_list(\@certificates);
+    $self->certificates_list(\@certificates) if @certificates > 0;
 
     $self->cached_until($self->parse_datetime($xml->findvalue(q{//cachedUntil[1]})));
 }
