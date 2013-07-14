@@ -48,6 +48,13 @@ has [qw( shares member_count member_limit )] => (
     traits => [qw( SetOnce )],
 );
 
+has 'alliance' => (
+    is        => 'rw',
+    isa       => 'Games::EVE::APIv2::Alliance',
+    traits    => [qw( SetOnce )],
+    predicate => 'has_alliance',
+);
+
 sub BUILD {
     my ($self) = @_;
 
@@ -61,6 +68,11 @@ sub BUILD {
 
     $self->member_count($xml->findvalue(q{//result/memberCount[1]}));
     $self->member_limit($xml->findvalue(q{//result/memberLimit[1]}) || undef);
+
+    $self->alliance(Games::EVE::APIv2::Alliance->new(
+        $self->keyinfo,
+        alliance_id => $xml->findvalue(q{//result/allianceID[1]}),
+    ));
 }
 
 __PACKAGE__->meta->make_immutable;
