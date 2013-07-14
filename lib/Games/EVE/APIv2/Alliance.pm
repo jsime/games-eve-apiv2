@@ -40,7 +40,7 @@ The CCP-supplied Alliance ID.
 
 has 'alliance_id' => (
     is        => 'rw',
-    isa       => 'Int',
+    isa       => 'Num',
     traits    => [qw( SetOnce )],
     predicate => 'has_alliance_id',
 );
@@ -80,7 +80,7 @@ the alliance.
 
 has 'executor' => (
     is        => 'rw',
-    isa       => 'Int',
+    isa       => 'Games::EVE::APIv2::Corporation',
     traits    => [qw( SetOnce )],
     predicate => 'has_executor',
 );
