@@ -1,5 +1,9 @@
 Revision history for Games-EVE-APIv2
 
-0.01    Date/time
-        First version, released on an unsuspecting world.
+0.02    2013-07-13
+        Fixed Character retrieval from multi-character API keys.
+
+0.01    2013-07-09
+        First usable version. Core API Key, Character, Corporation,
+        SkillTree and CertficateTree functionality.
 
