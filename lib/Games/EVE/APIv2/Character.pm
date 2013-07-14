@@ -90,6 +90,19 @@ has [qw( dob )] => (
     traits => [qw( SetOnce )],
 );
 
+=head2 security_status
+
+The current security status of the character.
+
+=cut
+
+has 'security_status' => (
+    is        => 'rw',
+    isa       => 'Num',
+    traits    => [qw( SetOnce )],
+    predicate => 'has_security_status',
+);
+
 =head2 balance
 
 Decimal value of the character's current ISK balance.
@@ -165,6 +178,12 @@ sub BUILD {
     $self->certificates_list(\@certificates) if @certificates > 0;
 
     $self->cached_until($self->parse_datetime($xml->findvalue(q{//cachedUntil[1]})));
+
+    unless ($self->has_security_status) {
+        $xml = $self->req->get('eve/CharacterInfo', characterID => $self->character_id);
+
+        $self->security_status($xml->findvalue(q{//result/securityStatus[1]}));
+    }
 }
 
 =head1 METHODS
