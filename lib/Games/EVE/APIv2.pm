@@ -40,6 +40,8 @@ use strict;
 use warnings FATAL => 'all';
 
 use Games::EVE::APIv2::Base;
+
+use Games::EVE::APIv2::Alliance;
 use Games::EVE::APIv2::Certificate;
 use Games::EVE::APIv2::Character;
 use Games::EVE::APIv2::Corporation;
