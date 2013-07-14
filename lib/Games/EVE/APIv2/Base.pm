@@ -105,10 +105,12 @@ sub characters {
 
     my $xml = $self->req->get('account/Characters');
 
-    foreach my $char_id ($xml->find(q{//result/rowset[@name='characters']/row/@characterID})) {
+    foreach my $char ($xml->findnodes(q{//result/rowset[@name='characters']/row})) {
+        my $char_id = $char->findvalue(q{@characterID});
+
         push(@chars, Games::EVE::APIv2::Character->new(
                 $self->keyinfo,
-                character_id => "$char_id",
+                character_id => $char_id,
         ));
     }
 
