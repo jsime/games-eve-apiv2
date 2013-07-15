@@ -55,6 +55,13 @@ has 'alliance' => (
     predicate => 'has_alliance',
 );
 
+has 'ceo' => (
+    is        => 'rw',
+    isa       => 'Games::EVE::APIv2::Character',
+    traits    => [qw( SetOnce )],
+    predicate => 'has_ceo',
+);
+
 sub BUILD {
     my ($self) = @_;
 
@@ -68,6 +75,10 @@ sub BUILD {
 
     $self->member_count($xml->findvalue(q{//result/memberCount[1]}));
     $self->member_limit($xml->findvalue(q{//result/memberLimit[1]}) || undef);
+
+    $self->ceo(Games::EVE::APIv2::Character->new(
+        character_id => $xml->findvalue(q{//result/ceoID[1]}),
+    ));
 
     $self->alliance(Games::EVE::APIv2::Alliance->new(
         $self->keyinfo,
