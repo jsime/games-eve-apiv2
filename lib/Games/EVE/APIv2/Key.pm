@@ -125,10 +125,18 @@ sub BUILD {
 
 sub for_character {
     my ($self, $character_id) = @_;
+
+    return unless $self->has_characters;
+    return 1 if grep { $_ == $character_id } @{$self->characters};
+    return 0;
 }
 
 sub for_corporation {
     my ($self, $corporation_id) = @_;
+
+    return unless $self->has_corporations;
+    return 1 if grep { $_ == $corporation_id } @{$self->corporations};
+    return 0;
 }
 
 __PACKAGE__->meta->make_immutable;
