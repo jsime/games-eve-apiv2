@@ -77,11 +77,12 @@ sub BUILD {
     $self->member_limit($xml->findvalue(q{//result/memberLimit[1]}) || undef);
 
     $self->ceo(Games::EVE::APIv2::Character->new(
+        key          => $self->key,
         character_id => $xml->findvalue(q{//result/ceoID[1]}),
     ));
 
     $self->alliance(Games::EVE::APIv2::Alliance->new(
-        $self->keyinfo,
+        key         => $self->key,
         alliance_id => $xml->findvalue(q{//result/allianceID[1]}),
     ));
 }

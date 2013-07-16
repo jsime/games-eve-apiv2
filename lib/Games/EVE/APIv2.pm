@@ -40,6 +40,7 @@ use strict;
 use warnings FATAL => 'all';
 
 use Games::EVE::APIv2::Base;
+use Games::EVE::APIv2::Key;
 
 use Games::EVE::APIv2::Alliance;
 use Games::EVE::APIv2::Certificate;
@@ -69,9 +70,18 @@ sub new {
     my ($self, %opts) = @_;
 
     die "Must provide key_id and v_code arguments!"
-        unless exists $opts{'key_id'} && exists $opts{'v_code'};
+        unless (exists $opts{'key_id'} && exists $opts{'v_code'})
+            or (exists $opts{'key'} && ref($opts{'key'}) eq 'Games::EVE::APIv2::Key');
 
-    return Games::EVE::APIv2::Base->new( key_id => $opts{'key_id'}, v_code => $opts{'v_code'} );
+    return Games::EVE::APIv2::Base->new( key => $opts{'key'} )
+        if exists $opts{'key'} && ref($opts{'key'}) eq 'Games::EVE::APIv2::Key';
+
+    my $key = Games::EVE::APIv2::Key->new( key_id => $opts{'key_id'}, v_code => $opts{'v_code'} );
+    die "Invalid key." unless defined $key;
+
+    return Games::EVE::APIv2::Base->new( key => $key );
+
+    die "Could not create new API object.";
 }
 
 =head1 AUTHOR

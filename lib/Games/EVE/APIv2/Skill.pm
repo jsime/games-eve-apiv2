@@ -221,7 +221,7 @@ sub check_cache {
     my @required_skills;
     foreach my $reqskill (@{$skill->{'skills'}}) {
         push(@required_skills, Games::EVE::APIv2::Skill->new(
-            $self->keyinfo,
+            key      => $self->key,
             skill_id => $reqskill->{'skill_id'},
             level    => $reqskill->{'level'},
         ));

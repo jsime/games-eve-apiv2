@@ -155,7 +155,7 @@ sub check_cache {
     $self->founded($self->parse_datetime($alliance->{'founded'})) unless $self->has_founded;
     $self->executor(
         Games::EVE::APIv2::Corporation->new(
-            $self->keyinfo,
+            key            => $self->key,
             corporation_id => $alliance->{'executor'},
         )) unless $self->has_executor;
 }

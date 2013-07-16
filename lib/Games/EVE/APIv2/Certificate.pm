@@ -201,7 +201,7 @@ sub update_cache {
                 foreach my $reqcertnode ($certificatenode->findnodes(q{rowset[@name='requiredCertificates']/row})) {
                     push(@{$certificates{$certificate_id}{'certificates'}},
                         Games::EVE::APIv2::Certificate->new(
-                            $self->keyinfo,
+                            key            => $self->key,
                             certificate_id => $reqcertnode->findvalue(q{@certificateID}),
                             grade          => $reqcertnode->findvalue(q{@grade}),
                         )
@@ -211,7 +211,7 @@ sub update_cache {
                 foreach my $skillnode ($certificatenode->findnodes(q{rowset[@name='requiredSkills']/row})) {
                     push(@{$certificates{$certificate_id}{'skills'}},
                         Games::EVE::APIv2::Skill->new(
-                            $self->keyinfo,
+                            key      => $self->key,
                             skill_id => $skillnode->findvalue(q{@typeID}),
                             level    => $skillnode->findvalue(q{@level}),
                         )

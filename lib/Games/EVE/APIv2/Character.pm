@@ -143,11 +143,34 @@ applications using this library.
 sub BUILD {
     my ($self) = @_;
 
-    my $xml = $self->req->get('char/CharacterSheet', characterID => $self->character_id);
+    my $xml = $self->req->get('eve/CharacterInfo', characterID => $self->character_id);
+    my @nodes = $xml->findnodes(q{//result/rowset[@name='employmentHistory']/row});
 
-    $self->name(     $xml->findvalue(q{//result/name[1]}));
+    my @corps;
+    foreach my $corpnode (@nodes) {
+        push(@corps,
+            Games::EVE::APIv2::Corporation->new(
+                key            => $self->key,
+                corporation_id => $corpnode->findvalue(q{@corporationID}),
+            )
+        );
+    }
+
+    $self->corporation_list(\@corps);
+
+    $self->name(     $xml->findvalue(q{//result/characterName[1]}));
     $self->race(     $xml->findvalue(q{//result/race[1]}));
-    $self->bloodline($xml->findvalue(q{//result/bloodLine[1]}));
+    $self->bloodline($xml->findvalue(q{//result/bloodline[1]}));
+    $self->security_status($xml->findvalue(q{//result/securityStatus[1]}));
+
+    # And short-circuit here if the current key isn't from this character.
+    unless ($self->key->for_character($self->character_id)) {
+        $self->cached_until($self->parse_datetime($xml->findvalue(q{//cachedUntil[1]})));
+        return 1;
+    }
+
+    $xml = $self->req->get('char/CharacterSheet', characterID => $self->character_id);
+
     $self->ancestry( $xml->findvalue(q{//result/ancestry[1]}));
     $self->gender(   $xml->findvalue(q{//result/gender[1]}));
     $self->balance(  $xml->findvalue(q{//result/balance[1]}));
@@ -162,7 +185,7 @@ sub BUILD {
     my @skillnodes = $xml->findnodes(q{//result/rowset[@name='skills']/row});
     foreach my $skillnode (@skillnodes) {
         push(@skills, Games::EVE::APIv2::Skill->new(
-            $self->keyinfo,
+            key         => $self->key,
             skill_id    => $skillnode->findvalue(q{@typeID}),
             level       => $skillnode->findvalue(q{@level}),
             skillpoints_trained => $skillnode->findvalue(q{@skillpoints}),
@@ -172,18 +195,13 @@ sub BUILD {
 
     my @certificates;
     push(@certificates, Games::EVE::APIv2::Certificate->new(
-            $self->keyinfo,
+            key            => $self->key,
             certificate_id => $_->findvalue(q{@certificateID}),
         )) for $xml->findnodes(q{//result/rowset[@name='certificates']/row});
     $self->certificates_list(\@certificates) if @certificates > 0;
 
-    $self->cached_until($self->parse_datetime($xml->findvalue(q{//cachedUntil[1]})));
-
-    unless ($self->has_security_status) {
-        $xml = $self->req->get('eve/CharacterInfo', characterID => $self->character_id);
-
-        $self->security_status($xml->findvalue(q{//result/securityStatus[1]}));
-    }
+    $self->cached_until($self->parse_datetime($xml->findvalue(q{//cachedUntil[1]})))
+        unless $self->has_cached_until;
 }
 
 =head1 METHODS
@@ -220,7 +238,7 @@ sub corporations {
     foreach my $corpnode (@nodes) {
         push(@corps,
             Games::EVE::APIv2::Corporation->new(
-                $self->keyinfo,
+                key            => $self->key,
                 corporation_id => $corpnode->findvalue(q{@corporationID}),
             )
         );
@@ -278,7 +296,7 @@ sub skill_queue {
     my @queue;
     foreach my $skillnode ($xml->findnodes(q{//result/rowset[@name='skillqueue']/row})) {
         push(@queue, Games::EVE::APIv2::Skill->new(
-            $self->keyinfo,
+            key        => $self->key,
             skill_id   => $skillnode->findvalue(q{@typeID}),
             position   => $skillnode->findvalue(q{@queuePosition}),
             level      => $skillnode->findvalue(q{@level}),
