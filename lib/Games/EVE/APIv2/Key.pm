@@ -13,7 +13,7 @@ use Games::EVE::APIv2::Request;
 class_has 'Cache' => (
     is      => 'rw',
     isa     => 'HashRef',
-    default => {},
+    default => sub { {} },
 );
 
 has 'key_id' => (
@@ -71,7 +71,7 @@ sub BUILD {
     # Check for the key in the class cache, just in case something has caused us
     # to create two separate objects for the same key. (The goal is to be as nice
     # to CCP's API as we can be.)
-    $cache_key = $self->key_id . '/' . $self->v_code;
+    my $cache_key = $self->key_id . '/' . $self->v_code;
     my $cached;
 
     if (exists $self->Cache->{$cache_key}) {
