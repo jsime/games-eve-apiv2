@@ -14,6 +14,7 @@ use strict;
 use warnings FATAL => 'all';
 
 use Moose;
+use MooseX::ClassAttribute;
 use namespace::autoclean;
 
 extends 'Games::EVE::APIv2::Base';
