@@ -132,11 +132,13 @@ sub check_cache {
     $self->ceo(Games::EVE::APIv2::Character->new(
         key          => $self->key,
         character_id => $xml->findvalue(q{//result/ceoID[1]}),
+        name         => $xml->findvalue(q{//result/ceoName[1]}),
     )) unless $self->has_ceo;
 
     $self->alliance(Games::EVE::APIv2::Alliance->new(
         key         => $self->key,
         alliance_id => $xml->findvalue(q{//result/allianceID[1]}),
+        name        => $xml->findvalue(q{//result/allianceName[1]}),
     )) unless $self->has_alliance;
 
     foreach $attr (qw( name ticker url tax_rate shares member_count member_limit ceo alliance )) {
