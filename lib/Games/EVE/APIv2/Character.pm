@@ -210,6 +210,11 @@ sub check_cache {
     # Short-circuit if we're setting the value.
     return if defined $value;
 
+    # Short-circuit if the Character ID is within the range of NPCs (encountered most
+    # frequently as CEOs of NPC corps. Unfortunately, the CharacterInfo API returns a
+    # 400 Bad Request for NPCs, instead of a dummied-up response.
+    return if $self->character_id < 4_000_000;
+
     my $has_attr;
 
     if (defined $attr) {
