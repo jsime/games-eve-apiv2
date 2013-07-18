@@ -18,34 +18,66 @@ use namespace::autoclean;
 
 extends 'Games::EVE::APIv2::Base';
 
+class_has 'Cache' => (
+    is      => 'rw',
+    isa     => 'HashRef',
+    default => sub { {} },
+);
+
 has 'corporation_id' => (
     is        => 'ro',
     isa       => 'Num',
     predicate => 'has_corporation_id',
+    required  => 1,
 );
 
-has [qw( name ticker )] => (
-    is     => 'rw',
-    isa    => 'Str',
-    traits => [qw( SetOnce )],
+has 'name' => (
+    is        => 'rw',
+    isa       => 'Str',
+    traits    => [qw( SetOnce )],
+    predicate => 'has_name',
 );
 
-has [qw( url )] => (
-    is     => 'rw',
-    isa    => 'Maybe[Str]',
-    traits => [qw( SetOnce )],
+has 'ticker' => (
+    is        => 'rw',
+    isa       => 'Str',
+    traits    => [qw( SetOnce )],
+    predicate => 'has_ticker',
 );
 
-has [qw( tax_rate )] => (
-    is     => 'rw',
-    isa    => 'Maybe[Num]',
-    traits => [qw( SetOnce )],
+has 'url' => (
+    is        => 'rw',
+    isa       => 'Maybe[Str]',
+    traits    => [qw( SetOnce )],
+    predicate => 'has_url',
 );
 
-has [qw( shares member_count member_limit )] => (
-    is     => 'rw',
-    isa    => 'Maybe[Int]',
-    traits => [qw( SetOnce )],
+has 'tax_rate' => (
+    is        => 'rw',
+    isa       => 'Maybe[Num]',
+    traits    => [qw( SetOnce )],
+    predicate => 'has_tax_rate',
+);
+
+has 'shares' => (
+    is        => 'rw',
+    isa       => 'Maybe[Int]',
+    traits    => [qw( SetOnce )],
+    predicate => 'has_shares',
+);
+
+has 'member_count' => (
+    is        => 'rw',
+    isa       => 'Maybe[Int]',
+    traits    => [qw( SetOnce )],
+    predicate => 'has_member_count',
+);
+
+has 'member_limit' => (
+    is        => 'rw',
+    isa       => 'Maybe[Int]',
+    traits    => [qw( SetOnce )],
+    predicate => 'has_member_limit',
 );
 
 has 'alliance' => (
@@ -62,29 +94,57 @@ has 'ceo' => (
     predicate => 'has_ceo',
 );
 
-sub BUILD {
-    my ($self) = @_;
+foreach my $attr (qw( name ticker url tax_rate shares member_count member_limit alliance ceo )) {
+    before $attr => sub { my ($self, $value) = @_; $self->check_cache($attr, $value); }
+}
+
+sub check_cache {
+    my ($self, $attr, $value) = @_;
+
+    # Short-circuit if we're setting the value.
+    return if defined $value;
+
+    my $has_attr;
+
+    if (defined $attr) {
+        $has_attr = 'has_' . $attr;
+        return 1 if $self->$has_attr;
+
+        if (exists $self->Cache->{$self->corporation_id} && exists $self->Cache->{$self->corporation_id}{$attr}) {
+            $self->$attr($self->Cache->{$self->corporation_id}{$attr});
+            return 1;
+        }
+    }
+
+    my $cached = {};
 
     my $xml = $self->req->get('corp/CorporationSheet', corporationID => $self->corporation_id);
 
-    $self->name(     $xml->findvalue(q{//result/corporationName[1]}));
-    $self->ticker(   $xml->findvalue(q{//result/ticker[1]}));
-    $self->url(      $xml->findvalue(q{//result/url[1]}));
-    $self->tax_rate( $xml->findvalue(q{//result/taxRate[1]}));
-    $self->shares(   $xml->findvalue(q{//result/shares[1]}));
+    $self->name(     $xml->findvalue(q{//result/corporationName[1]})) unless $self->has_name;
+    $self->ticker(   $xml->findvalue(q{//result/ticker[1]}))          unless $self->has_ticker;
+    $self->url(      $xml->findvalue(q{//result/url[1]}))             unless $self->has_url;
+    $self->tax_rate( $xml->findvalue(q{//result/taxRate[1]}))         unless $self->has_tax_rate;
+    $self->shares(   $xml->findvalue(q{//result/shares[1]}))          unless $self->has_shares;
 
-    $self->member_count($xml->findvalue(q{//result/memberCount[1]}));
-    $self->member_limit($xml->findvalue(q{//result/memberLimit[1]}) || undef);
+    $self->member_count($xml->findvalue(q{//result/memberCount[1]}))          unless $self->has_member_count;
+    $self->member_limit($xml->findvalue(q{//result/memberLimit[1]}) || undef) unless $self->has_member_limit;
 
     $self->ceo(Games::EVE::APIv2::Character->new(
         key          => $self->key,
         character_id => $xml->findvalue(q{//result/ceoID[1]}),
-    ));
+    )) unless $self->has_ceo;
 
     $self->alliance(Games::EVE::APIv2::Alliance->new(
         key         => $self->key,
         alliance_id => $xml->findvalue(q{//result/allianceID[1]}),
-    ));
+    )) unless $self->has_alliance;
+
+    foreach $attr (qw( name ticker url tax_rate shares member_count member_limit ceo alliance )) {
+        $has_attr = 'has_' . $attr;
+        $cached->{$attr} = $self->$attr if $self->$has_attr;
+    }
+
+    $self->Cache->{$self->corporation_id} = $cached;
 }
 
 __PACKAGE__->meta->make_immutable;

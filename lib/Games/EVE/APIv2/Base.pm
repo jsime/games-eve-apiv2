@@ -46,14 +46,14 @@ has 'character_list' => (
     is        => 'rw',
     isa       => 'ArrayRef[Games::EVE::APIv2::Character]',
     clearer   => 'clear_characters',
-    predicate => 'has_characters',
+    predicate => 'has_character_list',
 );
 
 has 'corporation_list' => (
     is        => 'rw',
     isa       => 'ArrayRef[Games::EVE::APIv2::Corporation]',
     clearer   => 'clear_corporations',
-    predicate => 'has_corporations',
+    predicate => 'has_corporation_list',
 );
 
 =head1 EXPORT
@@ -72,7 +72,7 @@ via the provided API Key.
 sub characters {
     my ($self) = @_;
 
-    return @{$self->character_list} if $self->has_characters;
+    return @{$self->character_list} if $self->has_character_list;
 
     my @chars;
 
@@ -105,7 +105,7 @@ Character object - as that will return the character's corporate history instead
 sub corporations {
     my ($self) = @_;
 
-    return @{$self->corporation_list} if $self->has_corporations;
+    return @{$self->corporation_list} if $self->has_corporation_list;
 }
 
 =head2 is_cached

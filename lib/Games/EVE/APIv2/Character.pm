@@ -16,6 +16,7 @@ use strict;
 use warnings FATAL => 'all';
 
 use Moose;
+use MooseX::ClassAttribute;
 use namespace::autoclean;
 
 extends 'Games::EVE::APIv2::Base';
@@ -27,6 +28,12 @@ addition to those provided by the base class.
 
 =cut
 
+class_has 'Cache' => (
+    is      => 'rw',
+    isa     => 'HashRef',
+    default => sub { {} },
+);
+
 =head2 character_id
 
 The CCP-supplied Character ID represented by the object.
@@ -37,6 +44,7 @@ has 'character_id' => (
     is        => 'ro',
     isa       => 'Num',
     predicate => 'has_character_id',
+    required  => 1,
 );
 
 =head2 name
@@ -65,17 +73,53 @@ The name of the character's current medical clone grade.
 
 =cut
 
-has [qw( name race bloodline ancestry gender clone_name )] => (
-    is     => 'rw',
-    isa    => 'Str',
-    traits => [qw( SetOnce )],
+has 'name' => (
+    is        => 'rw',
+    isa       => 'Str',
+    traits    => [qw( SetOnce )],
+    predicate => 'has_name',
+);
+
+has 'race' => (
+    is        => 'rw',
+    isa       => 'Str',
+    traits    => [qw( SetOnce )],
+    predicate => 'has_race',
+);
+
+has 'bloodline' => (
+    is        => 'rw',
+    isa       => 'Str',
+    traits    => [qw( SetOnce )],
+    predicate => 'has_bloodline',
+);
+
+has 'ancestry' => (
+    is        => 'rw',
+    isa       => 'Str',
+    traits    => [qw( SetOnce )],
+    predicate => 'has_ancestry',
+);
+
+has 'gender' => (
+    is        => 'rw',
+    isa       => 'Str',
+    traits    => [qw( SetOnce )],
+    predicate => 'has_gender',
+);
+
+has 'clone_name' => (
+    is        => 'rw',
+    isa       => 'Str',
+    traits    => [qw( SetOnce )],
+    predicate => 'has_clone_name',
 );
 
 has 'certificates_list' => (
     is        => 'rw',
     isa       => 'ArrayRef[Games::EVE::APIv2::Certificate]',
     traits    => [qw( SetOnce )],
-    predicate => 'has_certificate_list',
+    predicate => 'has_certificates_list',
 );
 
 =head2 dob
@@ -85,9 +129,10 @@ DateTime object representing the date of birth for the character.
 =cut
 
 has [qw( dob )] => (
-    is     => 'rw',
-    isa    => 'DateTime',
-    traits => [qw( SetOnce )],
+    is        => 'rw',
+    isa       => 'DateTime',
+    traits    => [qw( SetOnce )],
+    predicate => 'has_dob',
 );
 
 =head2 security_status
@@ -113,10 +158,18 @@ The total number of skill points supported by the character's current medical cl
 
 =cut
 
-has [qw( balance clone_skillpoints )] => (
-    is     => 'rw',
-    isa    => 'Num',
-    traits => [qw( SetOnce )],
+has 'balance' => (
+    is        => 'rw',
+    isa       => 'Num',
+    traits    => [qw( SetOnce )],
+    predicate => 'has_balance',
+);
+
+has 'clone_skillpoints' => (
+    is        => 'rw',
+    isa       => 'Num',
+    traits    => [qw( SetOnce )],
+    predicate => 'has_clone_skillpoints',
 );
 
 has 'skill_list' => (
@@ -133,6 +186,10 @@ has 'skill_queue_list' => (
     predicate => 'has_skill_queue_list',
 );
 
+foreach my $attr (qw( name race bloodline ancestry gender clone_name clone_skillpoints dob security_status )) {
+    before $attr => sub { my ($self, $value) = @_; $self->check_cache($attr, $value); }
+}
+
 =head1 INTERNAL METHODS
 
 The following methods are for internal use only and should not be called by
@@ -140,68 +197,112 @@ applications using this library.
 
 =cut
 
-sub BUILD {
-    my ($self) = @_;
+=head2 check_cache
+
+Verifies attribute is already available in the object, otherwise makes the remote
+API call to populate the cache and fills in the object.
+
+=cut
+
+sub check_cache {
+    my ($self, $attr, $value) = @_;
+
+    # Short-circuit if we're setting the value.
+    return if defined $value;
+
+    my $has_attr;
+
+    if (defined $attr) {
+        $has_attr = 'has_' . $attr;
+        return 1 if $self->$has_attr;
+
+        if (exists $self->Cache->{$self->character_id} && exists $self->Cache->{$self->character_id}{$attr}) {
+            $self->$attr($self->Cache->{$self->character_id}{$attr});
+            return 1;
+        }
+    }
+
+    my $cached = {};
 
     my $xml = $self->req->get('eve/CharacterInfo', characterID => $self->character_id);
     my @nodes = $xml->findnodes(q{//result/rowset[@name='employmentHistory']/row});
 
-    my @corps;
-    foreach my $corpnode (@nodes) {
-        push(@corps,
-            Games::EVE::APIv2::Corporation->new(
-                key            => $self->key,
-                corporation_id => $corpnode->findvalue(q{@corporationID}),
-            )
-        );
+    unless ($self->has_corporation_list) {
+        my @corps;
+
+        foreach my $corpnode (@nodes) {
+            push(@corps,
+                Games::EVE::APIv2::Corporation->new(
+                    key            => $self->key,
+                    corporation_id => $corpnode->findvalue(q{@corporationID}),
+                )
+            );
+        }
+
+        $self->corporation_list(\@corps);
     }
 
-    $self->corporation_list(\@corps);
+    $self->name(     $xml->findvalue(q{//result/characterName[1]}))        unless $self->has_name;
+    $self->race(     $xml->findvalue(q{//result/race[1]}))                 unless $self->has_race;
+    $self->bloodline($xml->findvalue(q{//result/bloodline[1]}))            unless $self->has_bloodline;
+    $self->security_status($xml->findvalue(q{//result/securityStatus[1]})) unless $self->has_security_status;
 
-    $self->name(     $xml->findvalue(q{//result/characterName[1]}));
-    $self->race(     $xml->findvalue(q{//result/race[1]}));
-    $self->bloodline($xml->findvalue(q{//result/bloodline[1]}));
-    $self->security_status($xml->findvalue(q{//result/securityStatus[1]}));
+    foreach $attr (qw( name race bloodline security_status corporation_list )) {
+        $has_attr = 'has_' . $attr;
+        $cached->{$attr} = $self->$attr if $self->$has_attr;
+    }
 
-    # And short-circuit here if the current key isn't from this character.
-    unless ($self->key->for_character($self->character_id)) {
+    # Make sure the current key is for this character before trying to get more details.
+    if ($self->key->for_character($self->character_id)) {
+        $xml = $self->req->get('char/CharacterSheet', characterID => $self->character_id);
+
+        $self->ancestry( $xml->findvalue(q{//result/ancestry[1]})) unless $self->has_ancestry;
+        $self->gender(   $xml->findvalue(q{//result/gender[1]}))   unless $self->has_gender;
+        $self->balance(  $xml->findvalue(q{//result/balance[1]}))  unless $self->has_balance;
+
+        $self->clone_name(       $xml->findvalue(q{//result/cloneName[1]}))        unless $self->has_clone_name;
+        $self->clone_skillpoints($xml->findvalue(q{//result/cloneSkillPoints[1]})) unless $self->has_clone_skillpoints;
+
+        unless ($self->has_dob) {
+            my $dob = $self->parse_datetime($xml->findvalue(q{//result/DoB[1]}));
+            $self->dob($dob) if $dob;
+        }
+
+        unless ($self->has_skill_list) {
+            my @skills;
+            my @skillnodes = $xml->findnodes(q{//result/rowset[@name='skills']/row});
+            foreach my $skillnode (@skillnodes) {
+                push(@skills, Games::EVE::APIv2::Skill->new(
+                    key         => $self->key,
+                    skill_id    => $skillnode->findvalue(q{@typeID}),
+                    level       => $skillnode->findvalue(q{@level}),
+                    skillpoints_trained => $skillnode->findvalue(q{@skillpoints}),
+                ));
+            }
+            $self->skill_list(\@skills) if @skills > 0;
+        }
+
+        unless ($self->has_certificates_list) {
+            my @certificates;
+            push(@certificates, Games::EVE::APIv2::Certificate->new(
+                    key            => $self->key,
+                    certificate_id => $_->findvalue(q{@certificateID}),
+                )) for $xml->findnodes(q{//result/rowset[@name='certificates']/row});
+            $self->certificates_list(\@certificates) if @certificates > 0;
+        }
+
+        $self->cached_until($self->parse_datetime($xml->findvalue(q{//cachedUntil[1]})))
+            unless $self->has_cached_until;
+    } else {
         $self->cached_until($self->parse_datetime($xml->findvalue(q{//cachedUntil[1]})));
-        return 1;
     }
 
-    $xml = $self->req->get('char/CharacterSheet', characterID => $self->character_id);
-
-    $self->ancestry( $xml->findvalue(q{//result/ancestry[1]}));
-    $self->gender(   $xml->findvalue(q{//result/gender[1]}));
-    $self->balance(  $xml->findvalue(q{//result/balance[1]}));
-
-    $self->clone_name(       $xml->findvalue(q{//result/cloneName[1]}));
-    $self->clone_skillpoints($xml->findvalue(q{//result/cloneSkillPoints[1]}));
-
-    my $dob = $self->parse_datetime($xml->findvalue(q{//result/DoB[1]}));
-    $self->dob($dob) if $dob;
-
-    my @skills;
-    my @skillnodes = $xml->findnodes(q{//result/rowset[@name='skills']/row});
-    foreach my $skillnode (@skillnodes) {
-        push(@skills, Games::EVE::APIv2::Skill->new(
-            key         => $self->key,
-            skill_id    => $skillnode->findvalue(q{@typeID}),
-            level       => $skillnode->findvalue(q{@level}),
-            skillpoints_trained => $skillnode->findvalue(q{@skillpoints}),
-        ));
+    foreach $attr (qw( ancestry gender balance clone_name clone_skillpoints dob skill_list certificates_list cached_until )) {
+        $has_attr = 'has_' . $attr;
+        $cached->{$attr} = $self->$attr if $self->$has_attr;
     }
-    $self->skill_list(\@skills) if @skills > 0;
 
-    my @certificates;
-    push(@certificates, Games::EVE::APIv2::Certificate->new(
-            key            => $self->key,
-            certificate_id => $_->findvalue(q{@certificateID}),
-        )) for $xml->findnodes(q{//result/rowset[@name='certificates']/row});
-    $self->certificates_list(\@certificates) if @certificates > 0;
-
-    $self->cached_until($self->parse_datetime($xml->findvalue(q{//cachedUntil[1]})))
-        unless $self->has_cached_until;
+    $self->Cache->{$self->character_id} = $cached;
 }
 
 =head1 METHODS
@@ -229,7 +330,7 @@ once.
 sub corporations {
     my ($self) = @_;
 
-    return @{$self->corporation_list} if $self->has_corporations;
+    return @{$self->corporation_list} if $self->has_corporation_list;
 
     my $xml = $self->req->get('eve/CharacterInfo', characterID => $self->character_id);
     my @nodes = $xml->findnodes(q{//result/rowset[@name='employmentHistory']/row});
@@ -278,7 +379,7 @@ earned by the character.
 sub certificates {
     my ($self) = @_;
 
-    return @{$self->certificates_list} if $self->has_certificate_list;
+    return @{$self->certificates_list} if $self->has_certificates_list;
     return;
 }
 
