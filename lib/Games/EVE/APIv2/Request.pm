@@ -143,10 +143,8 @@ sub get {
         }
     }
 
-print STDERR "**** $api ****\n";
     my $api_url = 'https://api.eveonline.com/' . $api . '.xml.aspx?' .
         (join('&', map { uri_escape($_) . '=' . uri_escape($opts{$_}) } sort keys %opts)) || '';
-print STDERR "**** $api_url ****\n";
 
     my $ua = LWP::UserAgent->new();
     $ua->agent(sprintf('%s (%s %s)', $ua->_agent, 'Games::EVE::APIv2', $Games::EVE::APIv2::VERSION));

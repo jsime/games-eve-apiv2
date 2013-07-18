@@ -120,7 +120,7 @@ sub check_cache {
     $self->tax_rate( $xml->findvalue(q{//result/taxRate[1]}))         unless $self->has_tax_rate;
     $self->shares(   $xml->findvalue(q{//result/shares[1]}))          unless $self->has_shares;
 
-    $self->member_count($xml->findvalue(q{//result/memberCount[1]}))          unless $self->has_member_count;
+    $self->member_count($xml->findvalue(q{//result/memberCount[1]})) unless $self->has_member_count;
 
     $self->ceo(Games::EVE::APIv2::Character->new(
         key          => $self->key,
