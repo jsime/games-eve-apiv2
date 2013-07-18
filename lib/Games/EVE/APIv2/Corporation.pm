@@ -74,13 +74,6 @@ has 'member_count' => (
     predicate => 'has_member_count',
 );
 
-has 'member_limit' => (
-    is        => 'rw',
-    isa       => 'Maybe[Int]',
-    traits    => [qw( SetOnce )],
-    predicate => 'has_member_limit',
-);
-
 has 'alliance' => (
     is        => 'rw',
     isa       => 'Games::EVE::APIv2::Alliance',
@@ -95,7 +88,7 @@ has 'ceo' => (
     predicate => 'has_ceo',
 );
 
-foreach my $attr (qw( name ticker url tax_rate shares member_count member_limit alliance ceo )) {
+foreach my $attr (qw( name ticker url tax_rate shares member_count alliance ceo )) {
     before $attr => sub { my ($self, $value) = @_; $self->check_cache($attr, $value); }
 }
 
@@ -128,7 +121,6 @@ sub check_cache {
     $self->shares(   $xml->findvalue(q{//result/shares[1]}))          unless $self->has_shares;
 
     $self->member_count($xml->findvalue(q{//result/memberCount[1]}))          unless $self->has_member_count;
-    $self->member_limit($xml->findvalue(q{//result/memberLimit[1]}) || undef) unless $self->has_member_limit;
 
     $self->ceo(Games::EVE::APIv2::Character->new(
         key          => $self->key,
@@ -142,7 +134,7 @@ sub check_cache {
         name        => $xml->findvalue(q{//result/allianceName[1]}),
     )) unless $self->has_alliance;
 
-    foreach $attr (qw( name ticker url tax_rate shares member_count member_limit ceo alliance )) {
+    foreach $attr (qw( name ticker url tax_rate shares member_count ceo alliance )) {
         $has_attr = 'has_' . $attr;
         $cached->{$attr} = $self->$attr if $self->$has_attr;
     }
