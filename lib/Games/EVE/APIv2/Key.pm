@@ -1,5 +1,17 @@
 package Games::EVE::APIv2::Key;
 
+=head1 NAME
+
+Games::EVE::APIv2::Key
+
+=head1 SYNOPSIS
+
+This class provides basic API Key validation, as well as convenience
+methods to determine which characters' and corporations' extended details
+may be accessed with a given key.
+
+=cut
+
 use strict;
 use warnings FATAL => 'all';
 
@@ -10,11 +22,24 @@ use namespace::autoclean;
 
 use Games::EVE::APIv2::Request;
 
+=head1 ATTRIBUTE METHODS
+
+The following attribute methods are provided (or overridden) by this class, in
+addition to those provided by the base class.
+
+=cut
+
 class_has 'Cache' => (
     is      => 'rw',
     isa     => 'HashRef',
     default => sub { {} },
 );
+
+=head2 key_id
+
+The Key ID provided by the CCP website.
+
+=cut
 
 has 'key_id' => (
     is        => 'rw',
@@ -23,12 +48,26 @@ has 'key_id' => (
     required  => 1,
 );
 
+=head2 v_code
+
+The Verification Code provided by the CCP website.
+
+=cut
+
 has 'v_code' => (
     is        => 'rw',
     isa       => 'Str',
     traits    => [qw( SetOnce )],
     required  => 1,
 );
+
+=head2 type
+
+A string representing the type of the key. Valid strings are:
+C<Account>, C<Character>, and C<Corporation>. Corporation keys may
+only be created by CEOs and Directors.
+
+=cut
 
 has 'type' => (
     is        => 'rw',
@@ -37,12 +76,32 @@ has 'type' => (
     predicate => 'has_type',
 );
 
+=head2 mask
+
+The Access Mask for the key, a bit mask enumerating the API endpoints
+accessible with this key. There is only one mask attribute, and the
+particular meaning of each bit will differ whether the key was for a
+corporation or not.
+
+=cut
+
 has 'mask' => (
     is        => 'rw',
     isa       => 'Int',
     traits    => [qw( SetOnce )],
     predicate => 'has_mask',
 );
+
+=head2 expires
+
+A DateTime object which contains the expiration date and time for the
+key. If the key has no expiration, this will still be a DateTime
+object, but it will be a DateTime::Infinite::Future instance, allowing
+you to perform all normal DateTime comparisons, as well as call the
+C<is_infinite> method and receive an intelligent (and appropriate)
+response.
+
+=cut
 
 has 'expires' => (
     is        => 'rw',
@@ -51,6 +110,15 @@ has 'expires' => (
     predicate => 'has_expires',
 );
 
+=head2 characters
+
+An internally-oriented attribute, holding an array reference of
+Character ID bigints for which this key is valid. It is recommended
+that you not use this attribute directly, but instead call the
+C<for_character> method described below. But I'm not the boss of you.
+
+=cut
+
 has 'characters' => (
     is        => 'rw',
     isa       => 'ArrayRef[Num]',
@@ -58,12 +126,25 @@ has 'characters' => (
     predicate => 'has_characters',
 );
 
+=head2 corporations
+
+Same as C<characters>, except for corporation IDs.
+
+=cut
+
 has 'corporations' => (
     is        => 'rw',
     isa       => 'ArrayRef[Num]',
     traits    => [qw( SetOnce )],
     predicate => 'has_corporations',
 );
+
+=head1 INTERNAL METHODS
+
+The following methods are for internal use only and should not be called by
+applications using this library.
+
+=cut
 
 sub BUILD {
     my ($self) = @_;
@@ -123,6 +204,13 @@ sub BUILD {
     return 1;
 }
 
+=head2 for_character
+
+Given a Character ID, will return true or false for whether this key is
+valid for that character.
+
+=cut
+
 sub for_character {
     my ($self, $character_id) = @_;
 
@@ -130,6 +218,13 @@ sub for_character {
     return 1 if grep { $_ == $character_id } @{$self->characters};
     return 0;
 }
+
+=head2 for_corporation
+
+Given a Corporation ID, will return true or false for whether this key is
+valid for that corporation.
+
+=cut
 
 sub for_corporation {
     my ($self, $corporation_id) = @_;
