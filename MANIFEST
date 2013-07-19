@@ -7,6 +7,7 @@ lib/Games/EVE/APIv2/Base.pm
 lib/Games/EVE/APIv2/Certificate.pm
 lib/Games/EVE/APIv2/Character.pm
 lib/Games/EVE/APIv2/Corporation.pm
+lib/Games/EVE/APIv2/Key.pm
 lib/Games/EVE/APIv2/Request.pm
 lib/Games/EVE/APIv2/Skill.pm
 Makefile.PL
