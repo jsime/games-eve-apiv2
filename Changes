@@ -1,5 +1,9 @@
 Revision history for Games-EVE-APIv2
 
+0.04    2013-07-18
+        - POD updates for Key class.
+        - Fixed MANIFEST so that module installs properly.
+
 0.03    2013-07-17
         - Character and Corporation classes now both lazy-load.
         - Broke key information out into dedicated Key class,
