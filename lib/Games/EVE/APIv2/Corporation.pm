@@ -19,6 +19,13 @@ use namespace::autoclean;
 
 extends 'Games::EVE::APIv2::Base';
 
+=head1 ATTRIBUTE METHODS
+
+The following attribute methods are provided (or overridden) by this class, in
+addition to those provided by the base class.
+
+=cut
+
 class_has 'Cache' => (
     is      => 'rw',
     isa     => 'HashRef',
@@ -91,6 +98,20 @@ has 'ceo' => (
 foreach my $attr (qw( name ticker url tax_rate shares member_count alliance ceo )) {
     before $attr => sub { my ($self, $value) = @_; $self->check_cache($attr, $value); }
 }
+
+=head1 INTERNAL METHODS
+
+The following methods are for internal use only and should not be called by
+applications using this library.
+
+=cut
+
+=head2 check_cache
+
+Verifies attribute is already available in the object, otherwise makes the remote
+API call to populate the cache and fills in the object.
+
+=cut
 
 sub check_cache {
     my ($self, $attr, $value) = @_;
