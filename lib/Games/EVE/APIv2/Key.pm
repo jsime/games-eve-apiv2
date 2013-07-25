@@ -234,6 +234,21 @@ sub for_corporation {
     return 0;
 }
 
+=head2 expired
+
+Will return true if the key has already expired. In all other cases, false.
+
+=cut
+
+sub expired {
+    my ($self) = @_;
+
+    return 0 if !$self->has_expires;
+    return 0 if $self->expires->is_infinite;
+    return 0 if $self->expires > DateTime->now();
+    return 1;
+}
+
 __PACKAGE__->meta->make_immutable;
 
 1;
