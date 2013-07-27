@@ -1,5 +1,9 @@
 Revision history for Games-EVE-APIv2
 
+0.05    2013-07-26
+        - Convenience method added to Key class: expired() for
+          boolean checks on key expiration status.
+
 0.04    2013-07-18
         - POD updates for Key class.
         - Fixed MANIFEST so that module installs properly.
@@ -7,8 +11,8 @@ Revision history for Games-EVE-APIv2
 0.03    2013-07-17
         - Character and Corporation classes now both lazy-load.
         - Broke key information out into dedicated Key class,
-        allowing for simple checking for key's association with
-        specific characters and corporations.
+          allowing for simple checking for key's association with
+          specific characters and corporations.
         - Expanded attributes exposed on several classes.
 
 0.02    2013-07-13
@@ -16,5 +20,5 @@ Revision history for Games-EVE-APIv2
 
 0.01    2013-07-09
         - First usable version. Core API Key, Character, Corporation,
-        SkillTree and CertficateTree functionality.
+          SkillTree and CertficateTree functionality.
 
