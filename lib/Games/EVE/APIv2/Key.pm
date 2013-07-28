@@ -199,7 +199,8 @@ sub BUILD {
     $self->Cache->{$cache_key} = $cached;
 
     foreach my $k (qw( type mask expires characters corporations )) {
-        $self->$k($cached->{$k});
+        my $has_k = 'has_' . $k;
+        $self->$k($cached->{$k}) unless $self->$has_k;
     }
 
     return 1;
