@@ -1,5 +1,9 @@
 Revision history for Games-EVE-APIv2
 
+0.06    2013-07-28
+        - Fix fatal error when Key object already has an attribute
+          prior to filling in with cached or API-fetched values.
+
 0.05    2013-07-26
         - Convenience method added to Key class: expired() for
           boolean checks on key expiration status.
