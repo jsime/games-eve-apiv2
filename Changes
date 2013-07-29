@@ -1,5 +1,10 @@
 Revision history for Games-EVE-APIv2
 
+0.07    2013-07-28
+        - Introduces support for start/end_date attributes on
+          Corporation objects when initialized through a Character
+          object's membership history.
+
 0.06    2013-07-28
         - Fix fatal error when Key object already has an attribute
           prior to filling in with cached or API-fetched values.
