@@ -356,7 +356,7 @@ sub corporations {
     foreach my $corpnode (@nodes) {
         push(@corps, {
             corporation_id => $corpnode->findvalue(q{@corporationID}),
-            start_date     => $self->parse_datetime($corpnode->findvalue(q{@startDate})),
+            start_date     => $self->parse_datetime($corpnode->findvalue(q{@startDate}))->add( seconds => 1 ),
         });
     }
 
