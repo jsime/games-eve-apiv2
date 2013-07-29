@@ -95,6 +95,18 @@ has 'ceo' => (
     predicate => 'has_ceo',
 );
 
+has 'start_date' => (
+    is        => 'ro',
+    isa       => 'DateTime',
+    predicate => 'has_start_date',
+);
+
+has 'end_date' => (
+    is        => 'ro',
+    isa       => 'DateTime',
+    predicate => 'has_end_date',
+);
+
 foreach my $attr (qw( name ticker url tax_rate shares member_count alliance ceo )) {
     before $attr => sub { my ($self, $value) = @_; $self->check_cache($attr, $value); }
 }
