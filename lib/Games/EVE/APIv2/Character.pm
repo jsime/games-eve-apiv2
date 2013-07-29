@@ -234,13 +234,25 @@ sub check_cache {
 
     unless ($self->has_corporation_list) {
         my @corps;
-
         foreach my $corpnode (@nodes) {
-            push(@corps,
-                Games::EVE::APIv2::Corporation->new(
-                    key            => $self->key,
-                    corporation_id => $corpnode->findvalue(q{@corporationID}),
-                )
+            push(@corps, {
+                corporation_id => $corpnode->findvalue(q{@corporationID}),
+                start_date     => $self->parse_datetime($corpnode->findvalue(q{@startDate}))->add( seconds => 1 ),
+            });
+        }
+
+        # Ensure that corporation memberships are sorted by the start_date so that
+        # we can easily calculate the end_date (which CCP does not provide).
+        @corps = sort { $b->{'start_date'} <=> $a->{'start_date'} } @corps;
+
+        for (my $i = 0; $i < @corps; $i++) {
+            if ($i > 0) {
+                $corps[$i]{'end_date'} = $corps[$i-1]->start_date->subtract( seconds => 1 );
+            }
+
+            $corps[$i] = Games::EVE::APIv2::Corporation->new(
+                key => $self->key,
+                %{$corps[$i]}
             );
         }
 
@@ -342,11 +354,24 @@ sub corporations {
 
     my @corps;
     foreach my $corpnode (@nodes) {
-        push(@corps,
-            Games::EVE::APIv2::Corporation->new(
-                key            => $self->key,
-                corporation_id => $corpnode->findvalue(q{@corporationID}),
-            )
+        push(@corps, {
+            corporation_id => $corpnode->findvalue(q{@corporationID}),
+            start_date     => $self->parse_datetime($corpnode->findvalue(q{@startDate})),
+        });
+    }
+
+    # Ensure that corporation memberships are sorted by the start_date so that
+    # we can easily calculate the end_date (which CCP does not provide).
+    @corps = sort { $b->{'start_date'} <=> $a->{'start_date'} } @corps;
+
+    for (my $i = 0; $i < @corps; $i++) {
+        if ($i > 0) {
+            $corps[$i]{'end_date'} = $corps[$i-1]->start_date->subtract( seconds => 1 );
+        }
+
+        $corps[$i] = Games::EVE::APIv2::Corporation->new(
+            key => $self->key,
+            %{$corps[$i]}
         );
     }
 
