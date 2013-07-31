@@ -436,10 +436,10 @@ sub skill_queue {
         # if the queue is paused, skills will have null startTime and endTime attributes,
         # so we can't blindly pass them into the Skill object.
         my $start_time = $skillnode->findvalue(q{@startTime});
-        $queue[-1]{'start_time'} = $self->parse_datetime($start_time) if $start_time;
+        $queue[-1]->start_time($self->parse_datetime($start_time)) if $start_time;
 
         my $end_time = $skillnode->findvalue(q{@endTime});
-        $queue[-1]{'end_time'} = $self->parse_datetime($end_time) if $end_time;
+        $queue[-1]->end_time($self->parse_datetime($end_time)) if $end_time;
 
         # the same goes for the start/end SP when the queue is paused
         my $start_sp = $skillnode->findvalue(q{@startSP});
