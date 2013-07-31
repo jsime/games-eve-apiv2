@@ -167,6 +167,29 @@ has 'end_time' => (
     predicate => 'has_end_time',
 );
 
+=head2 start_sp, end_sp
+
+Present only when the Skill object was created through a call to a Character's
+C<skill_queue> method. Indicates the number of skill points trained in the
+skill as of C<start_time> and the number that will be present as of
+C<end_time>, respectively.
+
+=cut
+
+has 'start_sp' => (
+    is        => 'rw',
+    isa       => 'Int',
+    traits    => [qw( SetOnce )],
+    predicate => 'has_start_sp',
+);
+
+has 'end_sp' => (
+    is        => 'rw',
+    isa       => 'Int',
+    traits    => [qw( SetOnce )],
+    predicate => 'has_end_sp',
+);
+
 has 'check_called' => (
     is      => 'rw',
     isa     => 'Bool',
