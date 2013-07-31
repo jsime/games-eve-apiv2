@@ -440,6 +440,13 @@ sub skill_queue {
 
         my $end_time = $skillnode->findvalue(q{@endTime});
         $queue[-1]{'end_time'} = $self->parse_datetime($end_time) if $end_time;
+
+        # the same goes for the start/end SP when the queue is paused
+        my $start_sp = $skillnode->findvalue(q{@startSP});
+        $queue[-1]->start_sp($start_sp) if $start_sp;
+
+        my $end_sp = $skillnode->findvalue(q{@endSP});
+        $queue[-1]->end_sp($end_sp) if $end_sp;
     }
 
     $self->skill_queue_list(\@queue);
