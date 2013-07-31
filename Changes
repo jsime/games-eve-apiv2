@@ -1,5 +1,9 @@
 Revision history for Games-EVE-APIv2
 
+0.08    2013-07-30
+        - Add start_sp/end_sp methods to Skill objects when created
+          through Character object's skill_queue method.
+
 0.07    2013-07-28
         - Introduces support for start/end_date attributes on
           Corporation objects when initialized through a Character
