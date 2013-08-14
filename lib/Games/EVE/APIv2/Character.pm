@@ -186,6 +186,13 @@ has 'skill_queue_list' => (
     predicate => 'has_skill_queue_list',
 );
 
+has 'roles_list' => (
+    is        => 'rw',
+    isa       => 'HashRef[ArrayRef[Num]]',
+    traits    => [qw( SetOnce )],
+    predicate => 'has_roles_list',
+);
+
 foreach my $attr (qw( name race bloodline ancestry gender clone_name clone_skillpoints dob security_status )) {
     before $attr => sub { my ($self, $value) = @_; $self->check_cache($attr, $value); }
 }
@@ -308,13 +315,34 @@ sub check_cache {
             $self->certificates_list(\@certificates) if @certificates > 0;
         }
 
+        unless ($self->has_roles_list) {
+            my %roles = (
+                '_def'  => [],
+                'hq'    => [],
+                'base'  => [],
+                'other' => [],
+            );
+
+            push(@{$roles{'_def'}}, $_->findvalue(q{@roleID}))
+                for $xml->findnodes(q{//result/rowset[@name='corporationRoles']/row});
+            push(@{$roles{'hq'}}, $_->findvalue(q{@roleID}))
+                for $xml->findnodes(q{//result/rowset[@name='corporationRolesAtHQ']/row});
+            push(@{$roles{'base'}}, $_->findvalue(q{@roleID}))
+                for $xml->findnodes(q{//result/rowset[@name='corporationRolesAtBase']/row});
+            push(@{$roles{'other'}}, $_->findvalue(q{@roleID}))
+                for $xml->findnodes(q{//result/rowset[@name='corporationRolesAtOther']/row});
+
+            $self->roles_list(\%roles);
+        }
+
         $self->cached_until($self->parse_datetime($xml->findvalue(q{//cachedUntil[1]})))
             unless $self->has_cached_until;
     } else {
         $self->cached_until($self->parse_datetime($xml->findvalue(q{//cachedUntil[1]})));
     }
 
-    foreach $attr (qw( ancestry gender balance clone_name clone_skillpoints dob skill_list certificates_list cached_until )) {
+    foreach $attr (qw( ancestry gender balance clone_name clone_skillpoints dob
+                       skill_list certificates_list roles_list cached_until )) {
         $has_attr = 'has_' . $attr;
         $cached->{$attr} = $self->$attr if $self->$has_attr;
     }
@@ -411,6 +439,27 @@ sub certificates {
 
     return @{$self->certificates_list} if $self->has_certificates_list;
     return;
+}
+
+=head2 roles
+
+Returns a list of Role IDs (64bit masks). Accepts a single, optional, argument which
+indicates which role set to return. If no argument is supplied, the default role set
+(corporation-level) is returned. Other rolesets available: C<HQ>, C<Base>, and C<Other>.
+
+=cut
+
+sub roles {
+    my ($self, $set) = @_;
+
+    if (defined $set && $set !~ m{^(hq|base|other)$}o) {
+        die "Invalid role set name requested: $set";
+    }
+
+    $set = '_def' unless defined $set;
+    $set = lc($set);
+
+    return @{$self->roles_list->{$set}};
 }
 
 =head2 skill_queue
