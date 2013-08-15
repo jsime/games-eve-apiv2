@@ -200,7 +200,43 @@ has 'titles_list' => (
     predicate => 'has_titles_list',
 );
 
-foreach my $attr (qw( name race bloodline ancestry gender clone_name clone_skillpoints dob security_status )) {
+has 'intelligence' => (
+    is        => 'rw',
+    isa       => 'Int',
+    traits    => [qw( SetOnce )],
+    predicate => 'has_intelligence',
+);
+
+has 'memory' => (
+    is        => 'rw',
+    isa       => 'Int',
+    traits    => [qw( SetOnce )],
+    predicate => 'has_memory',
+);
+
+has 'charisma' => (
+    is        => 'rw',
+    isa       => 'Int',
+    traits    => [qw( SetOnce )],
+    predicate => 'has_charisma',
+);
+
+has 'perception' => (
+    is        => 'rw',
+    isa       => 'Int',
+    traits    => [qw( SetOnce )],
+    predicate => 'has_perception',
+);
+
+has 'willpower' => (
+    is        => 'rw',
+    isa       => 'Int',
+    traits    => [qw( SetOnce )],
+    predicate => 'has_willpower',
+);
+
+foreach my $attr (qw( name race bloodline ancestry gender clone_name clone_skillpoints
+                      intelligence memory charisma perception willpower dob security_status )) {
     before $attr => sub { my ($self, $value) = @_; $self->check_cache($attr, $value); }
 }
 
@@ -347,6 +383,13 @@ sub check_cache {
 
             push(@titles, { id => $_->findvalue(q{@titleID}), name => $_->findvalue(q{@titleName}) })
                 for $xml->findnodes(q{//result/rowset[@name='corporationTitles']/row});
+        }
+
+        foreach my $attr (qw( intelligence memory charisma perception willpower )) {
+            my $has_attr = 'has_' . $attr;
+            next if $self->$has_attr;
+
+            $self->$attr($xml->findvalue(q{//result/attributes/} . $attr . q{[1]}));
         }
 
         $self->cached_until($self->parse_datetime($xml->findvalue(q{//cachedUntil[1]})))
