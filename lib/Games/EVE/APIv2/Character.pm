@@ -193,6 +193,13 @@ has 'roles_list' => (
     predicate => 'has_roles_list',
 );
 
+has 'titles_list' => (
+    is        => 'rw',
+    isa       => 'ArrayRef[HashRef[]]',
+    traits    => [qw( SetOnce )],
+    predicate => 'has_titles_list',
+);
+
 foreach my $attr (qw( name race bloodline ancestry gender clone_name clone_skillpoints dob security_status )) {
     before $attr => sub { my ($self, $value) = @_; $self->check_cache($attr, $value); }
 }
@@ -335,6 +342,13 @@ sub check_cache {
             $self->roles_list(\%roles);
         }
 
+        unless ($self->has_titles_list) {
+            my @titles;
+
+            push(@titles, { id => $_->findvalue(q{@titleID}), name => $_->findvalue(q{@titleName}) })
+                for $xml->findnodes(q{//result/rowset[@name='corporationTitles']/row});
+        }
+
         $self->cached_until($self->parse_datetime($xml->findvalue(q{//cachedUntil[1]})))
             unless $self->has_cached_until;
     } else {
@@ -460,6 +474,20 @@ sub roles {
     $set = lc($set);
 
     return @{$self->roles_list->{$set}};
+}
+
+=head2 titles
+
+Returns a list of the character's titles in their current corporation. Each element of
+the returned list is a hashref containing C<id> and C<name> keys.
+
+=cut
+
+sub titles {
+    my ($self) = @_;
+
+    return unless $self->has_titles_list;
+    return @{$self->titles_list};
 }
 
 =head2 skill_queue
