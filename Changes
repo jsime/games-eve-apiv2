@@ -1,5 +1,15 @@
 Revision history for Games-EVE-APIv2
 
+0.09    2013-08-14
+        - Added support for returning lists of Characters' roles in
+          their current corporation (default roles as well as HQ,
+          Base, and Other roles).
+        - Added support for returning list of Characters' titles in
+          their current corporation.
+        - Attribute methods for Characters to expose their...
+          attributes (Intelligence, Memory, Charisma, Perception,
+          and Willpower, that is).
+
 0.08    2013-07-30
         - Add start_sp/end_sp methods to Skill objects when created
           through Character object's skill_queue method.
