@@ -193,6 +193,27 @@ sub update_cache {
     $self->Cache(\%alliances);
 }
 
+=head2 all
+
+Returns an array of all alliances. While this will only trigger a single remote API
+call, it should still be used wisely as you are going to end up with thousands of
+Alliance objects.
+
+=cut
+
+sub all {
+    my ($class, $key) = @_;
+
+    # A little ugly, but we create a fake alliance object (only ever used in this
+    # class method) so that we can gain access to the class attribute Cache and
+    # the instance method which populates it; update_cache).
+    my $fake = Games::EVE::APIv2::Alliance->new( key => $key, alliance_id => 0 );
+    $fake->update_cache;
+
+    return map { Games::EVE::APIv2::Alliance->new( key => $key, alliance_id => $_ ) }
+        keys %{$fake->Cache};
+}
+
 __PACKAGE__->meta->make_immutable;
 
 1;
