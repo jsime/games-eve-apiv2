@@ -1,6 +1,11 @@
 Revision history for Games-EVE-APIv2
 
-0.09    2013-08-14
+0.010   2013-08-23
+        - Added an all() class method for Alliance, which returns
+          a list of every alliance in-game (time-intensive, but
+          it only requires one remote API call).
+
+0.009   2013-08-14
         - Added support for returning lists of Characters' roles in
           their current corporation (default roles as well as HQ,
           Base, and Other roles).
@@ -10,38 +15,38 @@ Revision history for Games-EVE-APIv2
           attributes (Intelligence, Memory, Charisma, Perception,
           and Willpower, that is).
 
-0.08    2013-07-30
+0.008   2013-07-30
         - Add start_sp/end_sp methods to Skill objects when created
           through Character object's skill_queue method.
 
-0.07    2013-07-28
+0.007   2013-07-28
         - Introduces support for start/end_date attributes on
           Corporation objects when initialized through a Character
           object's membership history.
 
-0.06    2013-07-28
+0.006   2013-07-28
         - Fix fatal error when Key object already has an attribute
           prior to filling in with cached or API-fetched values.
 
-0.05    2013-07-26
+0.005   2013-07-26
         - Convenience method added to Key class: expired() for
           boolean checks on key expiration status.
 
-0.04    2013-07-18
+0.004   2013-07-18
         - POD updates for Key class.
         - Fixed MANIFEST so that module installs properly.
 
-0.03    2013-07-17
+0.003   2013-07-17
         - Character and Corporation classes now both lazy-load.
         - Broke key information out into dedicated Key class,
           allowing for simple checking for key's association with
           specific characters and corporations.
         - Expanded attributes exposed on several classes.
 
-0.02    2013-07-13
+0.002   2013-07-13
         - Fixed Character retrieval from multi-character API keys.
 
-0.01    2013-07-09
+0.001   2013-07-09
         - First usable version. Core API Key, Character, Corporation,
           SkillTree and CertficateTree functionality.
 

@@ -6,11 +6,11 @@ Games::EVE::APIv2 - Perl interface to CCP's API (version 2) for EVE Online
 
 =head1 VERSION
 
-Version 0.09
+Version 0.010
 
 =cut
 
-our $VERSION = '0.09';
+our $VERSION = '0.010';
 
 =head1 SYNOPSIS
 
