@@ -98,6 +98,13 @@ has 'founded' => (
     predicate => 'has_founded',
 );
 
+has 'corporation_list' => (
+    is        => 'rw',
+    isa       => 'ArrayRef[Games::EVE::APIv2::Corporation]',
+    traits    => [qw( SetOnce )],
+    predicate => 'has_corporation_list',
+);
+
 has 'check_called' => (
     is      => 'rw',
     isa     => 'Bool',
@@ -106,6 +113,29 @@ has 'check_called' => (
 
 foreach my $attr (qw( alliance_id name short_name executor founded )) {
     before $attr => sub { $_[0]->check_called || $_[0]->check_cache($attr) }
+}
+
+=head1 METHODS
+
+=cut
+
+=head2 corporations
+
+Returns an array of Corporation objects for current members of the alliance.
+Each Corporation gains an additional attribute method of "start_date"
+containing the beginning of their current membership in the alliance.
+
+=cut
+
+sub corporations {
+    my ($self) = @_;
+
+    # Force a remote API call unless we've already done one
+    $self->update_cache unless $self->is_cached;
+    $self->check_called(1);
+
+    return @{$self->corporation_list} if $self->has_corporation_list;
+    return;
 }
 
 =head1 INTERNAL METHODS
@@ -187,6 +217,16 @@ sub update_cache {
             short_name  => $alliancenode->findvalue(q{@shortName}),
             executor    => $alliancenode->findvalue(q{@executorCorpID}),
             founded     => $alliancenode->findvalue(q{@startDate}),
+            members     => [],
+        }
+
+        foreach my $corpnode ($alliancenode->findnodes(q{rowset[@name='memberCorporations']/row})) {
+            push(@{$alliances{$alliance_id}{'members'}},
+                Games::EVE::APIv2::Corporation->new(
+                    key            => $self->key,
+                    corporation_id => $corpnode->findvalue(q{@corporationID}),
+                    from_date      => $self->parse_datetime($corpnode->findvalue(q{@startDate})),
+                ));
         }
     }
 
