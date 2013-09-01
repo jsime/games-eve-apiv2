@@ -218,7 +218,7 @@ sub update_cache {
             executor    => $alliancenode->findvalue(q{@executorCorpID}),
             founded     => $alliancenode->findvalue(q{@startDate}),
             members     => [],
-        }
+        };
 
         foreach my $corpnode ($alliancenode->findnodes(q{rowset[@name='memberCorporations']/row})) {
             push(@{$alliances{$alliance_id}{'members'}},
