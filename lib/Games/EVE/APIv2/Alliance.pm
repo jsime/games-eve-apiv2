@@ -188,6 +188,7 @@ sub check_cache {
             key            => $self->key,
             corporation_id => $alliance->{'executor'},
         )) unless $self->has_executor;
+    $self->corporation_list($alliance->{'members'}) unless $self->has_corporation_list;
 }
 
 =head2 update_cache
