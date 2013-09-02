@@ -226,7 +226,7 @@ sub update_cache {
                 Games::EVE::APIv2::Corporation->new(
                     key            => $self->key,
                     corporation_id => $corpnode->findvalue(q{@corporationID}),
-                    from_date      => $self->parse_datetime($corpnode->findvalue(q{@startDate})),
+                    start_date     => $self->parse_datetime($corpnode->findvalue(q{@startDate})),
                 ));
         }
     }
